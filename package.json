@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.14.2",
+    "bunyan": "^1.5.1",
     "crypto": "0.0.3",
     "express": "^4.13.3",
     "in-app-purchase": "^0.5.5",

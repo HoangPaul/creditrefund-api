@@ -9,72 +9,91 @@ var orders = require('./orders');
 var paypal = require('./paypal');
 var iap = require('./iap');
 
-//var crypto = require('crypto');
+var crypto = require('crypto');
 var validator = require('validator');
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name : 'api'});
 //var sleep = require('./sleep');
 
 var connection = require('./mysql');
 
-var genericErrorResponse = {
-	status : -1,
-	message : 'Something went wrong.',
-	showable : 0
-};
+router.use(function(req, res, next) {
+	crypto.randomBytes(4, function(ex, buf) {
+		var token = buf.toString('hex');
+		req.log = log.child({reqId : token});
+		next();
+	});
+});
 
 router.post('/verify', function(req, res, next) {
-	var productId = req.query.product_id;
-	var email = req.query.email;
+	var productId = req.body.product_id;
+	var email = req.body.email;
 	
-	if ((typeof productId === 'undefined' && !productId) ||(typeof email === 'undefined' && !email)) {
-		return next(
-			errors.shownError('Product ID and/or email was not supplied', {
-				productId : productId,
-				email : email
-			})
-		);
+	if ((typeof productId === 'undefined' && !productId) || (typeof email === 'undefined' && !email)) {
+		req.log.warn({
+			error : 'Missing email or product ID',
+			productId : productId,
+			email : email
+		});
+		return next('Missing email or amount of convert');
 	}
 
 	if (!validator.isEmail(email)) {
-		return next(
-			errors.shownError('The supplied email is malformed.', {
-				email : email
-			})
-		);
+		req.log.warn({
+			error : 'Malformed email address',
+			email : email
+		});
+		return next('Please enter a valid email address.');
 	}
 
 	products.getProduct(productId, function(err, productData) {
 		if (err) {
-			return next(err);
+			req.log.error({
+				error : err,
+				productId: productId
+			});
+			return next('We cannot convert this amount. Please try a different amount.');
 		}
 
 		payouts.payout(email, productData.value, function(err, data) {
 			if (err) {
-				return next(err);
+				req.log.error({
+					error : err,
+					email : email,
+					productDataValue : productData.value
+				});
+				return next(errors.defaultErrorMessage);
 			}
 			delete data.is_sendable;
 			data['status'] 	= 0;
 			data['message'] = '';
+			req.log.info(data);
 			res.status(200).send(JSON.stringify(data));
 		});
 	});
 });
 
 router.post('/confirm', function(req, res, next) {
-	var signature = req.query.signature;
-	var signedData = req.query.signed_data;
+	var signature = req.body.signature;
+	var signedData = req.body.signed_data;
 
 	if (typeof signature === 'undefined' || typeof signedData === 'undefined') {
-		return next(errors.shownError('signature or signedData is not supplied'));
+		req.log.error({
+			error : 'Missing signature or signed data',
+			signature : signature,
+			signedData : signedData
+		});
+		return next('Signature or signed data is not supplied');
 	}
 
 	iap.processOrder(signedData, signature, function(err, iapRes) {
 		if (err) {
-			return next(
-				errors.hiddenError(err, {
-					signedData : signedData,
-					signature : signature
-				}
-			));
+			req.log.error({
+				error : err,
+				signature : signature,
+				signedData : signedData
+			});
+			return next(errors.confirmErrorMessage);
 		}
 
 		var payloadObject = JSON.parse(iapRes.developerPayload);
@@ -83,12 +102,21 @@ router.post('/confirm', function(req, res, next) {
 
 		products.getProduct(productId, function(err, productData){
 			if (err) {
-				return next(err);
+				req.log.error({
+					error : err,
+					productId : productId,
+				});
+				return next(errors.confirmErrorMessage);
 			}
 
 			payouts.payout(email, productData.value, function(err, payoutData) {
 				if (err) {
-					return next(err);
+					req.log.error({
+						error : err,
+						email : email,
+						productDataValue : productData.value
+					});
+					return next(errors.confirmErrorMessage);
 				}
 		
 				var orderData = {
@@ -104,12 +132,20 @@ router.post('/confirm', function(req, res, next) {
 					google_value : payoutData.google_value,
 				};
 
-				console.log(orderData);
+				req.log.info({
+					state : 'Preparing to send',
+					email : email,
+					orderData : orderData
+				});
 
 				// Save the order and send a response immediately without waiting for Paypal.
 				orders.saveOrder(orderData, function(err, result) {
 					if (err) {
-						return next(err);
+						req.log.error({
+							error : err,
+							email : orderData,
+						});
+						return next(errors.confirmErrorMessage);
 					}
 
 					// We've successfully saved the data in the DB. We can notify the customer that
@@ -126,10 +162,17 @@ router.post('/confirm', function(req, res, next) {
 					if (typeof payoutData.is_sendable !== 'undefined' && payoutData.is_sendable) {
 						paypal.sendPayment(orderData, function(err, payoutObject) {
 							if (err) {
+								req.log.error({
+									error : err,
+									email : orderData,
+								});
 								orders.flagOrderFail(orderData);
 								return console.error(err);
 							}
-							console.log(payoutObject);
+							req.log.info({
+								state : 'Payout successful',
+								payoutObject : payoutObject
+							});
 							return orders.flagOrderSuccess(orderData);
 						});
 					}
@@ -139,30 +182,17 @@ router.post('/confirm', function(req, res, next) {
 	});
 });
 
+router.use(function(req, res, next) {
+	res.status(404).send();
+});
+
 router.use(function(err, req, res, next) {
-	console.error(err);
+	req.log.warn(err);
 	next(err);
 });
 
 router.use(function(err, req, res, next) {
-	if (typeof err.showable !== 'undefined' && err.showable > 0) {
-		var returnCode = err.code || 500;
-		res.status(returnCode).send(JSON.stringify({
-			'status' 	: -1,
-			'message'	: err.error.message,
-			'showable'	: 1
-		}));
-	} else {
-		next(err);
-	}
-});
-
-router.use(function(err, req, res, next) {
-	res.status(500).send(JSON.stringify(genericErrorResponse));
-});
-
-router.use(function(req, res) {
-	res.status(404).send(JSON.stringify(genericErrorResponse));
+	res.status(400).send(JSON.stringify({error : err}))
 });
 
 

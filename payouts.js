@@ -11,7 +11,9 @@ module.exports = {
 			}
 
 			if (row.length > 1) {
-				return callback(errors.hiddenError('Multiple email results retrieved', {email : email, numResults : row.length}));
+				return callback(
+					new Error('Multiple email results retrieved')
+				);
 			}
 
 			var data = {
@@ -38,10 +40,12 @@ module.exports = {
 			var total = new BigNumber(data.payout_value).plus(data.google_value).plus(data.admin_value);
 			var percentTotal = new BigNumber(data.payout).plus(data.admin).plus(data.google);
 			if (!total.equals(amount) || !percentTotal.equals(100)) {
-				return callback(errors.hiddenError('Total is not equal', {
+				return callback({
+					error : new Error('Payout total does not sum up'),
+					data : data,
 					total : total,
-					payout_data : data
-				}));
+					percentTotal : percentTotal
+				});
 			}
 			
 			data['payout_value'].toString();

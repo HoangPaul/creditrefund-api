@@ -10,10 +10,7 @@ module.exports = {
 
 			if (row.length !== 1) {
 				return callback(
-					errors.hiddenError('Retrieving product ID does not result in exactly 1 result', {
-						productId : productId,
-						numResults : row.length
-					})
+					new Error('Retrieving product ID does not result in exactly 1 result')
 				);
 			}
 

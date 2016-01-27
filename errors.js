@@ -1,26 +1,10 @@
-var merge = require('merge');
+var defaults = require('./defaults');
+var sprintf = require("sprintf-js").sprintf;
 
-var baseError = function(msg, data) {
-	var err = null;
-	if (typeof msg === 'Error') {
-		err = msg;
-	} else {
-		err = new Error(msg);
-	}
-	return merge({error : err}, data);
-};
+var defaultErrorMessage = sprintf('Oops! Something went wrong. Help us improve your experience by sending an error report to %s', defaults.SUPPORT_EMAIL);
+var confirmErrorMessage = sprintf('Oops! Something went wrong. Our technical staff have been notified of the issue and will be looking into this with the utmost urgency.');
 
 module.exports = {
-	shownError : function(msg, data) {
-		var err = baseError(msg, data);
-		err['showable'] = 1;
-		err['code'] = err['code'] || 400;
-		return err;
-	},
-	hiddenError : function(msg, data) {
-		var err = baseError(msg, data);
-		err['showable'] = 0;
-		err['code'] = err['code'] || 500;
-		return err;
-	}
+	DEFAULT_ERROR_MESSAGE : defaultErrorMessage,
+	CONFIRM_ERROR_MESSAGE : confirmErrorMessage
 };
