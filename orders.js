@@ -1,5 +1,4 @@
 var pool = require('./mysql');
-var errors = require('./errors');
 
 var ORDER_SUCCESS = 0;
 var ORDER_FAIL = 1;

@@ -1,5 +1,5 @@
 var defaults = require('./defaults');
-var errors = require('./errors');
+var fs = require('fs');
 
 var iap = require('in-app-purchase');
 iap.config({
