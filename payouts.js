@@ -19,12 +19,14 @@ module.exports = {
                 payout: defaults.PAYOUT,
                 admin: defaults.ADMIN,
                 google: defaults.GOOGLE,
+                is_sendable: defaults.IS_SENDABLE
             };
 
             if (row.length === 1) {
                 data['payout'] = row[0].payout;
                 data['admin'] = row[0].admin;
                 data['google'] = row[0].google;
+                data['is_sendable'] = row[0].is_sendable;
             }
 
             var total = new BigNumber(amount);

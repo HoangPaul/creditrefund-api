@@ -2,7 +2,7 @@ var defaults = require('./defaults');
 var sprintf = require("sprintf-js").sprintf;
 
 // Payment messages
-var referenceNumberMessage = sprintf('Reference Number: "%s"');
+var referenceNumberTemplate = 'Reference Number: "%s"';
 
 // Error messages
 var defaultErrorMessage = sprintf('Oops! Something went wrong. Help us improve your experience by sending an error report to %s', defaults.SUPPORT_EMAIL);
@@ -15,7 +15,7 @@ module.exports = {
     },
     payout : {
         REFERENCE_NUMBER_TEMPLATE : function(data) {
-            return sprintf(referenceNumberMessage, data);
+            return sprintf(referenceNumberTemplate, data);
         }
     }
 };
