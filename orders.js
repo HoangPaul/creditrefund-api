@@ -1,43 +1,36 @@
-var pool = require('./mysql');
+var dynamodb = require('./aws-db');
 
-var ORDER_SUCCESS = 0;
-var ORDER_FAIL = 1;
-
-var updateQuery = 'UPDATE `orders` SET `is_processed` = 1, `has_error` = ? WHERE `order_id` = ?';
+var TABLE_NAME = 'orders';
 
 module.exports = {
-	saveOrder : function(data, callback) {
-		pool.query('INSERT INTO orders SET ?', data, function(err, rows) {
+	saveOrder : function(orderData, callback) {
+		var params = {
+			TableName: TABLE_NAME,
+			Item: orderData
+		};
 
-			if (typeof callback === 'undefined') {
-				return;
-			}
-			if (err) {
-				return callback(err);
-			}
-			return callback(null, rows);
-		});
+		dynamodb.put(params, callback);
 	},
 	flagOrderSuccess : function(orderData, callback) {
-		pool.query(updateQuery, [ORDER_SUCCESS, orderData.order_id], function(err, rows) {
-			if (typeof callback === 'undefined') {
-				return;
-			}
-			if (err) {
-				return callback(err);
-			}
-			return callback(null, rows);
-		});
+		var params = {
+			TableName: TABLE_NAME,
+			Key: {
+				"order_id": orderData.order_id
+			},
+		    UpdateExpression: "SET is_processed = true, has_error = false"
+		};
+
+		dynamodb.update(params, callback);
 	},
 	flagOrderFail : function(orderData, callback) {
-		pool.query(updateQuery, [ORDER_FAIL, orderData.order_id],  function(err, rows) {
-			if (typeof callback === 'undefined') {
-				return;
-			}
-			if (err) {
-				return callback(err);
-			}
-			return callback(null, rows);
-		});
+		var params = {
+			TableName: TABLE_NAME,
+			Key: {
+				"order_id": orderData.order_id
+			},
+		    UpdateExpression: "SET is_processed = true, has_error = true"
+		};
+
+		dynamodb.update(params, callback);
 	}
 };

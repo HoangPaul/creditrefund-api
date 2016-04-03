@@ -1,4 +1,5 @@
 var payoutMessages = require('./messages').payout;
+var BigNumber = require('bignumber.js');
 
 var Pin = require('pinjs');
 var pin = Pin.setup({
@@ -7,22 +8,39 @@ var pin = Pin.setup({
 });
 
 module.exports = {
-    sendPayment : function(orderData, callback) {
+    sendPayment : function(orderData, payout, callback) {
+        var developerPayload = JSON.parse(orderData.developer_payload);
+
         var recipient = {
             'email': orderData.email,
-            'name': orderData.name,
+            'name': developerPayload.account_holder_name,
             'bank_account': {
-                'name': orderData.name,
-                'bsb': orderData.bsb,
-                'number': orderData.bankNumber
+                'name': developerPayload.account_holder_name,
+                'bsb': developerPayload.bsb,
+                'number': developerPayload.account_number
             }
         };
 
-        pin.createTransfer({
-            'description': payoutMessages.REFERENCE_NUMBER_TEMPLATE(orderData.order_id),
-            'amount': orderData.payout_value,
-            'currency': 'AUD'
-            'recipient': recipient
-        }, callback);
+        console.log('recipient is ' + JSON.stringify(recipient));
+
+        pin.createRecipient(recipient, function(err, data) {
+            if (err) {
+                return callback(err);
+            }
+
+            console.log('recipient return data is ' + JSON.stringify(data));
+
+            var recipientToken = data.token;
+
+            var transferObject = {
+                'description': payoutMessages.REFERENCE_NUMBER_TEMPLATE(orderData.order_id),
+                'amount': payout.getPayoutValue(payout.CENTS),
+                'currency': 'AUD',
+                'recipient': recipientToken
+            };
+
+            console.log('transfer object is ' + JSON.stringify(transferObject));
+            pin.createTransfer(transferObject, callback);
+        });
     }
 }

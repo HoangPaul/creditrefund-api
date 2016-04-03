@@ -9,7 +9,8 @@ paypal.configure({
 });
 
 module.exports = {
-    sendPayment: function(orderData, callback) {
+    sendPayment: function(orderData, payout, callback) {
+        console.log('Sending out paypal payment to ' + orderData.email);
         var syncMode = 'true';
         var payoutObject = {
             'sender_batch_header': {
@@ -19,7 +20,7 @@ module.exports = {
             'items': [{
                 'recipient_type': 'EMAIL',
                 'amount': {
-                    'value': orderData.payout_value,
+                    'value': payout.getPayoutValue(payout.DOLLARS),
                     'currency': 'AUD'
                 },
                 'receiver': orderData.email,

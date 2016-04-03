@@ -16,9 +16,6 @@ var bunyan = require('bunyan');
 var log = bunyan.createLogger({
     name: 'api'
 });
-//var sleep = require('./sleep');
-
-var connection = require('./mysql');
 
 router.use(function(req, res, next) {
     crypto.randomBytes(4, function(ex, buf) {
@@ -29,9 +26,6 @@ router.use(function(req, res, next) {
         next();
     });
 });
-
-var PAYOUT_OPTION_PAYPAL = 'paypal';
-var PAYOUT_OPTION_BANK = 'bank';
 
 /**
  * @var data : object

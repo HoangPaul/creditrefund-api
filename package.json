@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "async": "^2.0.0-rc.1",
+    "aws-sdk": "^2.3.0",
     "body-parser": "^1.14.2",
     "bunyan": "^1.5.1",
     "crypto": "0.0.3",
@@ -19,7 +20,7 @@
     "merge": "^1.2.0",
     "mysql": "^2.10.0",
     "paypal-rest-sdk": "^1.6.8",
-    "pinjs": "^1.0.1",
+    "pinjs": "github:thomasdavis/pinjs#fbed437b09a71902ae48d7e111735ad606f8d496",
     "sprintf-js": "^1.0.3",
     "validator": "^4.4.0"
   }

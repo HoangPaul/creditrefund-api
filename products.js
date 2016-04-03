@@ -1,19 +1,30 @@
-var pool = require('./mysql');
+var dynamodb = require('./aws-db');
+
+var TABLE_NAME = 'products';
 
 module.exports = {
     getProduct: function(productId, callback) {
-        pool.query('SELECT * FROM `products` WHERE product_id = ?', productId, function(err, row) {
-            if (err) {
-                return callback(err);
+        var params = {
+            TableName: TABLE_NAME,
+            KeyConditionExpression: "#id = :product_id",
+            ExpressionAttributeNames:{
+                "#id": "product_id"
+            },
+            ExpressionAttributeValues: {
+                ":product_id": productId
             }
 
-            if (row.length !== 1) {
-                return callback(
-                    new Error('Retrieving product ID does not result in exactly 1 result')
-                );
-            }
+            dynamodb.query(params, function(err, data) {
+                if (err) {
+                    return callback(err);
+                }
 
-            return callback(null, row[0]);
-        });
+                if (data.Count != 1) {
+                    return callback(new Error('Failed to retrieve product, got a non-single result.'));
+                }
+
+                return callback(null, data.Items[0]);
+            });
+        }
     }
 };
