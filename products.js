@@ -6,25 +6,21 @@ module.exports = {
     getProduct: function(productId, callback) {
         var params = {
             TableName: TABLE_NAME,
-            KeyConditionExpression: "#id = :product_id",
-            ExpressionAttributeNames:{
-                "#id": "product_id"
-            },
-            ExpressionAttributeValues: {
-                ":product_id": productId
+            Key: {
+                "product_id": productId
+            }
+        };
+
+        dynamodb.get(params, function(err, dbData) {
+            if (err) {
+                return callback(err);
             }
 
-            dynamodb.query(params, function(err, data) {
-                if (err) {
-                    return callback(err);
-                }
+            if (typeof dbData.Item === 'undefined') {
+                return callback(new Error('Failed to retrieve product, got a non-single result.'));
+            }
 
-                if (data.Count != 1) {
-                    return callback(new Error('Failed to retrieve product, got a non-single result.'));
-                }
-
-                return callback(null, data.Items[0]);
-            });
-        }
+            return callback(null, dbData.Item);
+        });
     }
 };

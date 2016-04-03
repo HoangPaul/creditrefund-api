@@ -8,13 +8,19 @@ var products = require('./products');
 var orders = require('./orders');
 var paypal = require('./paypal');
 var iap = require('./iap');
+var payoutProcessor = require('./payout-processor');
 
 var async = require('async');
 var crypto = require('crypto');
 var validator = require('validator');
 var bunyan = require('bunyan');
 var log = bunyan.createLogger({
-    name: 'api'
+    name: 'api',
+    serializers: {
+        error: function(err) {
+            return err.toString();
+        }
+    }
 });
 
 router.use(function(req, res, next) {
@@ -26,66 +32,6 @@ router.use(function(req, res, next) {
         next();
     });
 });
-
-/**
- * @var data : object
- * @var invalidInput : object
- */
-var isValidVerifyInput = function(data, invalidInput) {
-    var requiredFields = [
-        'product_id',
-        'email',
-        'payout_option'
-    ];
-
-    // Check common required fields
-    for (var i = 0; i < requiredFields.length; i++) {
-        var requiredField = requiredFields[i];
-        if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
-            invalidInput[requiredField] = data[requiredField] || 'undefined';
-            return false;
-        }
-    }
-
-    // Check payout option
-    var payoutOption = data['payout_option'];
-    var requiredPayoutOption = [
-        PAYOUT_OPTION_PAYPAL,
-        PAYOUT_OPTION_BANK
-    ];
-
-    if (requiredPayoutOption.indexOf(payoutOption) === -1) {
-        invalidInput['payout_option'] = payoutOption;
-        return false;
-    }
-
-
-    // Check bank required fields
-    if (payoutOption === PAYOUT_OPTION_BANK) {
-        var bankRequiredFields = [
-            'account_holder_name',
-            'bsb',
-            'account_number'
-        ];
-
-        for (var i = 0; i < bankRequiredFields.length; i++) {
-            var requiredField = bankRequiredFields[i];
-            if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
-                invalidInput[requiredField] = data[requiredField];
-                return false;
-            }
-        }
-    }
-
-    var email = data['email'];
-
-    // Check email
-    if (!validator.isEmail(email)) {
-        invalidInput['email'] = email;
-        return false;
-    }
-    return true;
-}
 
 /**
  * Expects the following data:
@@ -104,11 +50,28 @@ var isValidVerifyInput = function(data, invalidInput) {
 router.post('/verify', function(req, res, next) {
     async.waterfall([
         function(callback) {
-            var invalidInput = {};
-            if (!isValidVerifyInput(req.body, invalidInput)) {
-                return callback('Invalid input ' + JSON.stringify(invalidInput));
+            var data = req.body;
+
+            // Check email
+            if (!validator.isEmail(data['email'])) {
+                return callback(new Error('Malformed email "' + data['email'] + '"'));
             }
-            return callback();
+
+            // Check common required fields
+            var requiredFields = [
+                'product_id',
+                'email',
+                'payout_option'
+            ];
+
+            for (var i = 0; i < requiredFields.length; i++) {
+                var requiredField = requiredFields[i];
+                if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
+                    return callback(new Error('Missing required field "' + requiredField + '"'));
+                }
+            }
+
+            return payoutProcessor.validatePayoutData(data, callback);
         },
         function(callback) {
             var productId = req.body.product_id;
@@ -116,9 +79,9 @@ router.post('/verify', function(req, res, next) {
         },
         function(productData, callback) {
             var email = req.body.email;
-            return payouts.payout(email, productData.value, callback);
+            return payouts.getPayoutInfo(email, productData.value, callback);
         }
-    ], function(err, result) {
+    ], function(err, payoutData) {
         if (err) {
             req.log.error({
                 error: err,
@@ -126,8 +89,14 @@ router.post('/verify', function(req, res, next) {
             });
             return next(apiMessages.DEFAULT_ERROR);
         }
-        result['status'] = 0;
-        result['message'] = '';
+
+        var result = {
+            status: 0,
+            message: '',
+            payout_value: payoutData.getPayoutValue(),
+            admin_value: payoutData.getAdminValue(),
+            google_value: payoutData.getGoogleValue()
+        };
         req.log.info(result);
         res.status(200).send(JSON.stringify(result));
     });
@@ -174,7 +143,7 @@ router.post('/confirm', function(req, res, next) {
                 return callback('Missing signature or signed data');
             }
             return callback();
-        }
+        },
         function(callback) {
             return iap.processOrder(signedData, signature, callback);
         },

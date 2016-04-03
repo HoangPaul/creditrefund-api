@@ -67,22 +67,14 @@ module.exports = {
     getPayoutInfo: function(email, amount, callback) {
         var params = {
             TableName: TABLE_NAME,
-            KeyConditionExpression: "#email = :email",
-            ExpressionAttributeNames:{
-                "#email": "email"
-            },
-            ExpressionAttributeValues: {
-                ":email": email
+            Key: {
+                "email": email
             }
         };
 
-        dynamodb.query(params, function(err, data) {
+        dynamodb.get(params, function(err, dbData) {
             if (err) {
                 return callback(err);
-            }
-
-            if (data.Count > 1) {
-                return callback(new Error('Multiple email addresses retrieved'))
             }
 
             var data = {
@@ -93,12 +85,12 @@ module.exports = {
 
             var isSendable = defaults.IS_SENDABLE;
 
-            if (data.Count == 1) {
-                data['payout'] = data.Items[0].payout;
-                data['admin'] = data.Items[0].admin;
-                data['google'] = data.Items[0].google;
+            if (typeof dbData.Item !== 'undefined') {
+                data['payout'] = dbData.Item.payout;
+                data['admin'] = dbData.Item.admin;
+                data['google'] = dbData.Item.google;
 
-                isSendable = data.Items[0].is_sendable;
+                isSendable = dbData.Item.is_sendable;
             }
 
             var payout = new Payout(amount, data, isSendable);

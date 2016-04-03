@@ -20,28 +20,24 @@ module.exports = {
 
         var params = {
             TableName: TABLE_NAME,
-            KeyConditionExpression: "#payout_option = :payout_option",
-            ExpressionAttributeNames:{
-                "#payout_option": "payout_option"
-            },
-            ExpressionAttributeValues: {
-                ":payout_option": payoutOption
+            Key: {
+                "payout_option": payoutOption
             }
         };
 
-        dynamodb.query(params, function(err, dbData) {
+        dynamodb.get(params, function(err, dbData) {
             if (err) {
                 return callback(err);
             }
 
-            if (dbData.Count != 1) {
-                return callback(new Error('Failed to retrieve payout option, got a non-single result.'));
+            if (typeof dbData.Item === 'undefined') {
+                return callback(new Error('Failed to retrieve payout option "' + payoutOption + '"'));
             }
 
-            var isEnabled = dbData.Items[0].is_enabled;
+            var isEnabled = dbData.Item.is_enabled;
 
             if (!isEnabled) {
-                return callback(new Error('Payout option is not enabled.'));
+                return callback(new Error('Payout option "' + payoutOption + '" is not enabled.'));
             }
 
             // Check bank required fields
@@ -55,7 +51,7 @@ module.exports = {
             }
 
             return callback();
-        }
+        });
     },
     sendPayment: function(orderData, payout, callback) {
         switch (orderData.payout_option) {
