@@ -54,13 +54,15 @@ module.exports = {
         });
     },
     sendPayment: function(orderData, payout, callback) {
-        switch (orderData.payout_option) {
+        switch (orderData.developer_payload.payout_option) {
             case PAYOUT_OPTION_PAYPAL:
                 paypal.sendPayment(orderData, payout, callback);
                 break;
             case PAYOUT_OPTION_BANK:
                 pinjs.sendPayment(orderData, payout, callback);
                 break;
+            default:
+                return callback(new Error('Could not find payout option "' + orderData.payout_option + '"'));
         }
     }
 };

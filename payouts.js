@@ -39,7 +39,7 @@ Payout.prototype.getAdminValue = function(format) {
     return _getPayoutValue(this.adminValue, format);
 }
 
-Payout.prototype.isSendable = function() {
+Payout.prototype.getIsSendable = function() {
     return this.isSendable;
 }
 

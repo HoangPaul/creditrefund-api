@@ -17,9 +17,8 @@ var bunyan = require('bunyan');
 var log = bunyan.createLogger({
     name: 'api',
     serializers: {
-        error: function(err) {
-            return err.toString();
-        }
+        err: bunyan.stdSerializers.err,
+        req: bunyan.stdSerializers.req
     }
 });
 
@@ -84,8 +83,9 @@ router.post('/verify', function(req, res, next) {
     ], function(err, payoutData) {
         if (err) {
             req.log.error({
-                error: err,
-                requestBody : req.body
+                err: err,
+                req: req,
+                body: req.body
             });
             return next(apiMessages.DEFAULT_ERROR);
         }
@@ -140,54 +140,53 @@ router.post('/confirm', function(req, res, next) {
             var signedData = req.body.signed_data;
 
             if (typeof signature === 'undefined' || typeof signedData === 'undefined') {
-                return callback('Missing signature or signed data');
+                return callback(new Error('Missing signature or signed data'));
             }
-            return callback();
+            return callback(null, signedData, signature);
         },
-        function(callback) {
+        function(signedData, signature, callback) {
             return iap.processOrder(signedData, signature, callback);
         },
-        function(iapRes, callback) {
-            var payloadObject = JSON.parse(iapRes.developerPayload);
-            var productId = iapRes.productId;
-            return products.getProduct(productId, function(err, productData) {
-                callback(err, productData, iapRes, payloadObject);
+        function(signedData, callback) {
+            var developerPayload = JSON.parse(signedData.developerPayload);
+            var productId = signedData.productId;
+            console.log('product id is ' + productId);
+            return products.getProduct(productId, function(err, product) {
+                callback(err, product, signedData, developerPayload);
             });
         },
-        function(productData, iapRes, payloadObject, callback) {
-            return payouts.payout(payloadObject.email, productData.value, function(err, payoutData) {
-                callback(err, payoutData, productData, iapRes, payloadObject);
+        function(product, signedData, developerPayload, callback) {
+            return payouts.getPayoutInfo(developerPayload.email, product.value, function(err, payout) {
+                callback(err, payout, product, signedData, developerPayload);
             });
         },
-        function(payoutData, productData, iapRes, payloadObject, callback) {
+        function(payout, product, signedData, developerPayload, callback) {
             var orderData = {
-                order_id: iapRes.orderId,
-                token: iapRes.purchaseToken,
-                product_id: iapRes.productId,
+                order_id: signedData.orderId,
+                email: developerPayload.email,
                 timestamp: Date.now(),
-                is_processed: 0,
-                email: payloadObject.email,
-                total_value: productData.value,
-                payout_value: payoutData.payout_value,
-                admin_value: payoutData.admin_value,
-                google_value: payoutData.google_value
+                is_processed: false,
+                has_error: false,
+                signed_data: signedData,
+                developer_payload: developerPayload
             };
 
             req.log.info({
                 state: 'Preparing to send',
-                email: payloadObject.email,
+                email: developerPayload.email,
                 orderData: orderData
             });
 
             orders.saveOrder(orderData, function(err, _) {
-                return callback(err, payoutData, productData, iapRes, payloadObject);
+                return callback(err, orderData, payout, product, signedData, developerPayload);
             })
         }
-    ], function(err, payoutData, productData, iapRes, payloadObject) {
+    ], function(err, order, payout, product, signedData, developerPayload) {
         if (err) {
             req.log.error({
-                error: err,
-                requestBody : req.body
+                err: err,
+                req: req,
+                body: req.body
             });
             return next(apiMessages.CONFIRM_ERROR);
         }
@@ -203,24 +202,26 @@ router.post('/confirm', function(req, res, next) {
         // Only make the Paypal request when there's no errors in saving the order. This
         // protects the payment from being sent twice. If there's an error, a human
         // should deal with it manually.
-        if (typeof payoutData.is_sendable !== 'undefined' && payoutData.is_sendable) {
-            console.log('before send');
-            return;
-            paypal.sendPayment(orderData, function(err, payoutObject) {
+        if (payout.getIsSendable()) {
+            console.log('sending');
+            payoutProcessor.sendPayment(order, payout, function(err, payoutObject) {
                 if (err) {
                     req.log.error({
                         error: err,
-                        email: orderData,
+                        email: order,
                     });
-                    orders.flagOrderFail(orderData);
+                    orders.flagOrderFail(order);
                     return console.error(err);
                 }
                 req.log.info({
                     state: 'Payout successful',
                     payoutObject: payoutObject
                 });
-                return orders.flagOrderSuccess(orderData);
+                return orders.flagOrderSuccess(order);
             });
+        } else {
+            console.log('not sending');
+            return orders.flagOrderSuccess(order);
         }
     });
 });

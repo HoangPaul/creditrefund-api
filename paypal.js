@@ -25,7 +25,7 @@ module.exports = {
                 },
                 'receiver': orderData.email,
                 'note': payoutMessages.REFERENCE_NUMBER_TEMPLATE(orderData.order_id),
-                'sender_item_id': orderData.product_id
+                'sender_item_id': orderData.signed_data.productId
             }]
         };
 

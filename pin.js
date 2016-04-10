@@ -9,7 +9,7 @@ var pin = Pin.setup({
 
 module.exports = {
     sendPayment : function(orderData, payout, callback) {
-        var developerPayload = JSON.parse(orderData.developer_payload);
+        var developerPayload = orderData.developer_payload;
 
         var recipient = {
             'email': orderData.email,
