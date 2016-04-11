@@ -13,6 +13,7 @@ var payoutProcessor = require('./payout-processor');
 var async = require('async');
 var crypto = require('crypto');
 var validator = require('validator');
+var fs = require('fs');
 var bunyan = require('bunyan');
 var log = bunyan.createLogger({
     name: 'api',
@@ -134,6 +135,7 @@ router.post('/verify', function(req, res, next) {
  *
  */
 router.post('/confirm', function(req, res, next) {
+    fs.writeFile('./logs/' + Date.now().toString(), JSON.stringify(req.body), 'utf-8', function(){});
     async.waterfall([
         function(callback) {
             var signature = req.body.signature;
@@ -217,12 +219,36 @@ router.post('/confirm', function(req, res, next) {
                     state: 'Payout successful',
                     payoutObject: payoutObject
                 });
-                return orders.flagOrderSuccess(order);
+                return orders.flagOrderSuccess(order, function(err, response) {
+                    if (err) {
+                        return console.log(err);
+                    }
+                    return console.log(response);
+                });
             });
         } else {
             console.log('not sending');
-            return orders.flagOrderSuccess(order);
+            return orders.flagOrderSuccess(order, function(err, response) {
+                if (err) {
+                    return console.log(err);
+                }
+                return console.log(response);
+            });
         }
+    });
+});
+
+router.post('/test', function(req, res, next) {
+    var orderId = req.body.order_id;
+    orders.getOrder(orderId, function(err, order) {
+        return orders.flagOrderSuccess(order, function(err, response) {
+            if (err) {
+                res.send('Failed!');
+                return console.log(err);
+            }
+            res.send('Success!');
+            return console.log(response);
+        });
     });
 });
 
