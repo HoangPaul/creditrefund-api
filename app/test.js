@@ -1,3 +1,9 @@
+var Pin = require('pinjs');
+var pin = Pin.setup({
+    key : 'AFhAptuFLfbKtU8V20qgWw',
+    production: false
+});
+
 var context = {
     dbDriver: require('app/db-driver/aws-db'),
     config: {
@@ -5,6 +11,11 @@ var context = {
         ADMIN: 10,
         GOOGLE: 30,
         IS_SENDABLE: true
+    },
+    payoutMessages: {}, // pinjs
+    processor: {
+        pin: pin,
+        paypal: {}
     }
 };
 

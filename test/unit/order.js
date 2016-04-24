@@ -32,7 +32,16 @@ describe('hooks', function() {
                     "service": "google",
                     "status": 0
                 },
-                "timestamp": 1460373890238
+                "timestamp": 1460373890238,
+                "payoutData": {
+                    "email": "asd@asd.com",
+                    "isSendable": true,
+                    "percentages": {
+                        "admin": 70,
+                        "google": 30,
+                        "payout": 0
+                    }
+                }
             }
         };
         testContext.dbDriver.put(params, function(err, a) {

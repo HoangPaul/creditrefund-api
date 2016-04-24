@@ -110,7 +110,18 @@ Customer.prototype.getIsSendable = function() {
  * @return {string}
  */
 Customer.prototype.toString = function() {
-    return JSON.stringify(this.percentages);
+    return JSON.stringify(this.toObject());
 };
+
+/**
+ * @returns {{email: string, percentages: object, isSendable: boolean}}
+ */
+Customer.prototype.toObject = function() {
+    return {
+        'email': this.email,
+        'percentages': this.percentages,
+        'isSendable': this.isSendable
+    };
+}
 
 module.exports = Customer;

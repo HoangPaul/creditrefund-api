@@ -12,7 +12,8 @@ var required = [
     'isProcessed',
     'signedData',
     'timestamp',
-    'developerPayload'
+    'developerPayload',
+    'payoutData'
 ];
 
 /**
@@ -127,6 +128,18 @@ OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
 };
 
 /**
+ * @param {string} developerPayload
+ * @return OrderBuilder
+ */
+OrderBuilder.prototype.setPayoutData = function(payoutData) {
+    if (typeof customer !== 'object') {
+        throw new TypeError('payoutData is not an object.');
+    }
+    this.payoutData = payoutData;
+    return this;
+};
+
+/**
  * @return {Order}
  */
 OrderBuilder.prototype.build = function() {
@@ -151,7 +164,8 @@ OrderBuilder.prototype.build = function() {
         this.isProcessed,
         this.signedData,
         this.timestamp,
-        this.developerPayload
+        this.developerPayload,
+        this.payoutData
     );
 };
 

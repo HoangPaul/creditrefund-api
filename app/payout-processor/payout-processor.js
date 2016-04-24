@@ -53,7 +53,7 @@ module.exports = {
             return callback();
         });
     },
-    sendPayment: function(orderData, payout, callback) {
+    sendPayment: function(order, payoutValue, callback) {
         switch (orderData.developer_payload.payout_option) {
             case PAYOUT_OPTION_PAYPAL:
                 paypal.sendPayment(orderData, payout, callback);

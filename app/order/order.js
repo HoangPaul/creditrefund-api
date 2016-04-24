@@ -11,6 +11,7 @@ var TABLE_NAME = 'orders';
  * @param {object} signedData
  * @param {number} timestamp
  * @param {object} developerPayload
+ * @param {object} payoutData
  * @class Order
  */
 function Order(
@@ -21,7 +22,8 @@ function Order(
     isProcessed,
     signedData,
     timestamp,
-    developerPayload) {
+    developerPayload,
+    payoutData) {
     this.context = context;
     this.orderId = orderId;
     this.email = email;
@@ -30,6 +32,7 @@ function Order(
     this.signedData = signedData;
     this.timestamp = timestamp;
     this.developerPayload = developerPayload;
+    this.payoutData = payoutData;
 }
 
 /**
@@ -143,6 +146,13 @@ Order.prototype.getDeveloperPayload = function() {
 };
 
 /**
+ * @return {Customer}
+ */
+Order.prototype.getPayoutData = function() {
+    return this.payoutData;
+};
+
+/**
  * @return {object}
  */
 Order.prototype.toObject = function() {
@@ -153,7 +163,8 @@ Order.prototype.toObject = function() {
         'isProcessed': this.isProcessed,
         'signedData': this.signedData,
         'timestamp': this.timestamp,
-        'developerPayload': this.developerPayload
+        'developerPayload': this.developerPayload,
+        'payoutData': this.payoutData
     };
 };
 

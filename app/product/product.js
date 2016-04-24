@@ -1,3 +1,5 @@
+var TABLE_NAME = 'products'
+
 /**
  * @param {string} productId
  * @param {number} value
@@ -8,6 +10,11 @@ function Product(productId, value) {
     this.value = value;
 }
 
+/**
+ * @param {{dbDriver: object}} context
+ * @param {string} productId
+ * @param {function(?object, Product=) callback
+ */
 Product.load = function(context, productId, callback) {
     var params = {
         TableName: TABLE_NAME,
