@@ -1,14 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-var defaults = require('./defaults');
-var apiMessages = require('./messages').api;
-var payouts = require('./payouts');
-var products = require('./products');
-var orders = require('./orders');
-var paypal = require('./paypal');
-var iap = require('./iap');
-var payoutProcessor = require('./payout-processor');
+var apiMessages = require('app/messages').api;
+var payouts = require('payouts');
+var products = require('products');
+var orders = require('orders');
+var paypal = require('paypal');
+var iap = require('iap');
+var payoutProcessor = require('payout-processor');
 
 var async = require('async');
 var crypto = require('crypto');

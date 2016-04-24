@@ -2,9 +2,9 @@
   "name": "myapp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "webroot/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node webroot/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,8 +12,10 @@
   "dependencies": {
     "async": "^2.0.0-rc.1",
     "aws-sdk": "^2.3.0",
+    "bignumber.js": "^2.3.0",
     "body-parser": "^1.14.2",
     "bunyan": "^1.5.1",
+    "chai": "^3.5.0",
     "crypto": "0.0.3",
     "express": "^4.13.3",
     "in-app-purchase": "^0.5.5",
@@ -23,5 +25,8 @@
     "pinjs": "github:thomasdavis/pinjs#fbed437b09a71902ae48d7e111735ad606f8d496",
     "sprintf-js": "^1.0.3",
     "validator": "^4.4.0"
+  },
+  "devDependencies": {
+    "minami": "^1.1.1"
   }
 }
