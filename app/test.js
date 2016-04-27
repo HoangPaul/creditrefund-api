@@ -1,8 +1,4 @@
-var Pin = require('pinjs');
-var pin = Pin.setup({
-    key : 'AFhAptuFLfbKtU8V20qgWw',
-    production: false
-});
+var PayoutGenericHelper = require('app/payout/helper');
 
 var context = {
     dbDriver: require('app/db-driver/aws-db'),
@@ -12,10 +8,20 @@ var context = {
         GOOGLE: 30,
         IS_SENDABLE: true
     },
-    payoutMessages: {}, // pinjs
+    payoutMessages: {
+        REFERENCE_NUMBER_TEMPLATE: function() {/* todo */}
+    },
     processor: {
-        pin: pin,
-        paypal: {}
+        pin: {
+            adapter: pin,
+            isEnabled: PayoutGenericHelper.isEnabled, // todo: fix this
+            isValidData: PayoutGenericHelper.isValidData // todo: fix this
+        },
+        paypal: {
+            adapter: paypal,
+            isEnabled: PayoutGenericHelper.isEnabled, // todo: fix this
+            isValidData: PayoutGenericHelper.isValidData // todo: fix this
+        }
     }
 };
 

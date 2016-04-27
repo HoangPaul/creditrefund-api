@@ -17,7 +17,7 @@ function Customer(email, percentages, isSendable) {
 /**
  * @param {{dbDriver: object, config: object}} context
  * @param {string} email
- * @param {function(?object {Payout=}) callback
+ * @param {function(?object Payout=) callback
  */
 Customer.load = function(context, email, callback) {
     var params = {

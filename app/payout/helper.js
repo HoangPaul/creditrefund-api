@@ -1,0 +1,50 @@
+var ValidationResult = require('app/validation/result');
+
+var TABLE_NAME = 'payout_options';
+
+function PayoutHelper(context) {
+    this.context = context;
+}
+
+/**
+ * @param {string} payoutOption
+ * @param {function(?Error, boolean=) callback
+ */
+PayoutHelper.prototype.isEnabledGeneric = function(payoutOption, callback) {
+    var params = {
+        TableName: TABLE_NAME,
+        Key: {
+            "payout_option": payoutOption
+        }
+    };
+
+    this.context.dbDriver.get(params, function(err, dbData) {
+        if (err) {
+            return callback(err);
+        }
+
+        if (typeof dbData.Item === 'undefined') {
+            return callback(new Error('Failed to retrieve payout option "' + payoutOption + '"'));
+        }
+
+        return callback(null, dbData.Item.is_enabled);
+    });
+};
+
+/**
+ * @param {string} payoutOption
+ * @param {string[]} data
+ */
+PayoutHelper.prototype.isValidDataGeneric = function(payoutOption, data, requiredFields) {
+    var validationResult = new ValidationResult();
+
+    for (var i = 0; i < requiredFields.length; i++) {
+        var requiredField = requiredFields[i];
+        if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
+            validationResult.addError(new Error("Missing required field '" + requiredField + "'"));
+        }
+    }
+    return validationResult;
+};
+
+module.exports = PayoutHelper;
