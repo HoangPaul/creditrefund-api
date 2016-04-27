@@ -4,17 +4,19 @@ var PAYOUT_OPTION = 'paypal';
 
 /**
  * @param {{dbDriver: object, processor: object}} context
+ * @param {object} helper
  * @constructor
  */
-function Paypal(context) {
+function Paypal(context, helper) {
     this.context = context;
+    this.helper = helper;
 }
 
 /**
  * @param function(?object, boolean=) callback
  */
 Paypal.prototype.isEnabled = function(callback) {
-    return this.context.processor.paypal.isEnabled(PAYOUT_OPTION, callback);
+    return this.helper.isEnabled(PAYOUT_OPTION, callback);
 };
 
 /**
@@ -22,7 +24,7 @@ Paypal.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Paypal.prototype.isValidData = function(data) {
-    return this.context.processor.paypal.isValidData(PAYOUT_OPTION, data, ['email']);
+    return this.helper.isValidData(PAYOUT_OPTION, data, ['email']);
 };
 
 /**

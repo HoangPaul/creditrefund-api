@@ -1,5 +1,3 @@
-var PayoutGenericHelper = require('app/payout/helper');
-
 var context = {
     dbDriver: require('app/db-driver/aws-db'),
     config: {
@@ -13,14 +11,10 @@ var context = {
     },
     processor: {
         pin: {
-            adapter: pin,
-            isEnabled: PayoutGenericHelper.isEnabled, // todo: fix this
-            isValidData: PayoutGenericHelper.isValidData // todo: fix this
+            adapter: pin
         },
         paypal: {
-            adapter: paypal,
-            isEnabled: PayoutGenericHelper.isEnabled, // todo: fix this
-            isValidData: PayoutGenericHelper.isValidData // todo: fix this
+            adapter: paypal
         }
     }
 };

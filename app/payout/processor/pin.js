@@ -6,40 +6,19 @@ var PAYOUT_OPTION = 'pin';
 
 /**
  * @param {{dbDriver: object}} context
+ * @param {object} helper
  * @constructor
  */
-function Pin(context) {
+function Pin(context, helper) {
     this.context = context;
+    this.helper = helper;
 }
 
 /**
  * @param function(?object, boolean=) callback
  */
 Pin.prototype.isEnabled = function(callback) {
-    var params = {
-        TableName: TABLE_NAME,
-        Key: {
-            "payout_option": PAYOUT_OPTION
-        }
-    };
-
-    this.context.dbDriver.get(params, function(err, dbData) {
-        if (err) {
-            return callback(err);
-        }
-
-        if (typeof dbData.Item === 'undefined') {
-            return callback(new Error('Failed to retrieve payout option "' + PAYOUT_OPTION + '"'));
-        }
-
-        var isEnabled = dbData.Item.is_enabled;
-
-        if (!isEnabled) {
-            return callback(new Error('Payout option "' + PAYOUT_OPTION + '" is not enabled.'));
-        }
-
-        return callback(null, true);
-    });
+    return this.helper.isEnabled(PAYOUT_OPTION, callback);
 };
 
 /**
@@ -47,16 +26,7 @@ Pin.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Pin.prototype.isValidData = function(data) {
-    var bankRequiredFields = ['accountHolderName', 'bsb', 'accountNumber'];
-    var validationResult = new ValidationResult();
-
-    for (var i = 0; i < bankRequiredFields.length; i++) {
-        var requiredField = bankRequiredFields[i];
-        if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
-            validationResult.addError(new Error("Missing required field '" + requiredField + "'"));
-        }
-    }
-    return validationResult;
+    return this.helper.isValidData(PAYOUT_OPTION, data, ['accountHolderName', 'bsb', 'accountNumber']);
 };
 
 /**

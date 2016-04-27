@@ -13,7 +13,7 @@ describe('Payout Helper', function() {
             var payoutHelper = new PayoutGenericHelper(testContext);
             var testPayoutOption = 'paypal_test_enabled';
 
-            payoutHelper.isEnabledGeneric(testPayoutOption, function(err, isEnabled) {
+            payoutHelper.isEnabled(testPayoutOption, function(err, isEnabled) {
                 if (err) {
                     throw err;
                 }
@@ -29,7 +29,7 @@ describe('Payout Helper', function() {
             var payoutHelper = new PayoutGenericHelper(testContext);
             var testPayoutOption = 'paypal_test_disabled';
 
-            payoutHelper.isEnabledGeneric(testPayoutOption, function (err, isEnabled) {
+            payoutHelper.isEnabled(testPayoutOption, function (err, isEnabled) {
                 if (err) {
                     throw err;
                 }
@@ -45,7 +45,7 @@ describe('Payout Helper', function() {
             var payoutHelper = new PayoutGenericHelper(testContext);
             var testPayoutOption = 'non-existent-payout-option';
 
-            payoutHelper.isEnabledGeneric(testPayoutOption, function(err, isEnabled) {
+            payoutHelper.isEnabled(testPayoutOption, function(err, isEnabled) {
                 assert.isNotNull(err);
                 done();
             });
@@ -65,7 +65,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidDataGeneric(testPayoutOption, data, required);
+            var result = payoutHelper.isValidData(testPayoutOption, data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -86,7 +86,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidDataGeneric(testPayoutOption, data, required);
+            var result = payoutHelper.isValidData(testPayoutOption, data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -105,7 +105,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidDataGeneric(testPayoutOption, data, required);
+            var result = payoutHelper.isValidData(testPayoutOption, data, required);
 
             assert.isTrue(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -121,7 +121,7 @@ describe('Payout Helper', function() {
             var data = {};
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidDataGeneric(testPayoutOption, data, required);
+            var result = payoutHelper.isValidData(testPayoutOption, data, required);
 
             assert.isTrue(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -140,7 +140,7 @@ describe('Payout Helper', function() {
             };
             var required = [];
 
-            var result = payoutHelper.isValidDataGeneric(testPayoutOption, data, required);
+            var result = payoutHelper.isValidData(testPayoutOption, data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());
