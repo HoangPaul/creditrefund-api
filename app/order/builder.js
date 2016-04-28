@@ -22,9 +22,6 @@ var required = [
  */
 function OrderBuilder(context) {
     this.context = context;
-    // Default values
-    this.hasError = false;
-    this.isProcessed = false;
 }
 
 /**
@@ -59,8 +56,8 @@ OrderBuilder.prototype.setOrderId = function(orderId) {
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setEmail = function(email) {
-    if (typeof orderId !== 'string') {
-        throw new TypeError('orderId is not a string value.');
+    if (typeof email !== 'string') {
+        throw new TypeError('email is not a string value.');
     }
     this.email = email;
     return this;
@@ -95,8 +92,8 @@ OrderBuilder.prototype.setIsProcessed = function(isProcessed) {
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setSignedData = function(signedData) {
-    if (typeof signedData !== 'string') {
-        throw new TypeError('signedData is not a string value.');
+    if (typeof signedData !== 'object') {
+        throw new TypeError('signedData is not an object.');
     }
     this.signedData = signedData;
     return this;
@@ -120,8 +117,8 @@ OrderBuilder.prototype.setTimestamp = function(timestamp) {
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
-    if (typeof developerPayload !== 'string') {
-        throw new TypeError('developerPayload is not a string value.');
+    if (typeof developerPayload !== 'object') {
+        throw new TypeError('developerPayload is not an object.');
     }
     this.developerPayload = developerPayload;
     return this;
@@ -132,7 +129,7 @@ OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setPayoutData = function(payoutData) {
-    if (typeof customer !== 'object') {
+    if (typeof payoutData !== 'object') {
         throw new TypeError('payoutData is not an object.');
     }
     this.payoutData = payoutData;

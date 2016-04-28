@@ -46,7 +46,8 @@ Order.load = function(context, orderId, callback) {
         TableName: TABLE_NAME,
         Key: {
             'orderId': orderId
-        }
+        },
+        ConsistentRead: true
     };
 
     dbDriver.get(params, function(err, orderData) {
