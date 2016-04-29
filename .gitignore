@@ -1,4 +1,10 @@
-node_modules/
-npm-debug.log
-logs/*
-aws-config.json
+api/node_modules/
+api/npm-debug.log
+api/logs/*
+api/aws-config.json
+api/docs
+
+# static site
+www/nodule_modules/
+www/resources/assets/vendor/
+www/public/assets/

@@ -1,0 +1,19 @@
+.cr-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.cr-center-flex {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.cr-content--no-padding {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.cr-layout--min-padding {
+    padding-left: 15px;
+    padding-right: 15px;
+}

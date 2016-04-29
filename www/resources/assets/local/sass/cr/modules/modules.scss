@@ -1,0 +1,17 @@
+.cr-module {
+    padding-top: 90px;
+    padding-bottom: 90px;
+    background: unquote("rgba(#{$color-black}, 0.10)");
+}
+
+.cr-module__module {
+    padding-bottom: 30px;
+}
+
+.cr-module__icons {
+    font-size: 60px;
+    color: unquote("rgba(#{$color-black}, 0.80)");
+}
+.cr-module__text {
+    display: block;
+}

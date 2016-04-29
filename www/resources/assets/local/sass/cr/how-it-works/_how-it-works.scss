@@ -1,0 +1,20 @@
+.cr-how-it-works {
+    padding-top: 60px;
+    padding-bottom: 40px;
+    background: unquote("rgba(#{$color-black}, 0.02)");
+}
+
+.cr-how-it-works__icons {
+    font-size: 60px;
+    color: unquote("rgba(#{$color-black}, 0.80)");
+    display: block;
+    text-align: center;
+
+    @media screen and (min-width: 760px) {
+        text-align: right;
+    }
+}
+
+.cr-how-it-works__step {
+    padding-bottom: 45px;
+}

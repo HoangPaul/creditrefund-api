@@ -1,0 +1,40 @@
+$cr-hero-container-height: 70vh;
+
+.cr-hero {
+    position: relative;
+    background-image: url("https://placehold.it/3000x2000/666666");
+
+    min-height: calc(#{$cr-hero-container-height} - #{$layout-desktop-header-height});
+    padding-top: 60px;
+    padding-bottom: 60px;
+
+    @media screen and (max-width: $layout-screen-size-threshold) {
+        min-height: calc(#{$cr-hero-container-height} - #{$layout-mobile-header-height});
+    }
+}
+
+.cr-hero__text {
+    position: relative;
+    z-index: 10;
+    color: white;
+    font-size: 60px;
+    line-height: 1em;
+}
+
+.cr-hero__text--bottom {
+    bottom: 20%;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.cr-hero__button {
+    margin-top: 30px;
+}
+
+.cr-hero__next-button {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    bottom: 0;
+}
