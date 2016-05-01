@@ -5,6 +5,6 @@ api/aws-config.json
 api/docs
 
 # static site
-www/nodule_modules/
+www/node_modules/
 www/resources/assets/vendor/
 www/public/assets/

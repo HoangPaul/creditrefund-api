@@ -1,6 +1,9 @@
 $color-primary: 55,71,79;
 $color-accent: 255,64,129;
 
+$input-text-label-color: rgba(0,0,0, 0.8);
+$input-text-bottom-border-color: rgba(0,0,0, 0.8);
+
 @import "../../vendor/material-design-lite/src/material-design-lite";
 
 @import "cr/variables";
@@ -8,3 +11,12 @@ $color-accent: 255,64,129;
 @import "core/core";
 
 @import "cr/cr";
+
+body {
+    display: flex;
+    flex-direction: row;
+}
+
+.mdl-layout {
+    height: auto;
+}
