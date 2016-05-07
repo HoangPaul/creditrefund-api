@@ -27,13 +27,18 @@ var testOrderData = {
         "status": 0
     },
     "timestamp": 1460373890238,
-    "payoutData": {
-        "email": "asd@asd.com",
-        "isSendable": true,
-        "percentages": {
-            "admin": 70,
-            "google": 30,
-            "payout": 0
+    "quote": {
+        "Total": {
+            "value": "10000"
+        },
+        "Payout": {
+            "value": "6500"
+        },
+        "Google Fee": {
+            "value": "3000"
+        },
+        "Admin Fee": {
+            "value": "500"
         }
     }
 };
@@ -85,8 +90,8 @@ describe('Order', function() {
                         case 'developerPayload':
                             orderBuilder.setDeveloperPayload(incompleteData[key]);
                             break;
-                        case 'payoutData':
-                            orderBuilder.setPayoutData(incompleteData[key]);
+                        case 'quote':
+                            orderBuilder.setQuote(incompleteData[key]);
                             break;
                         default:
                             throw new Error('Have additional property in test data ' + keyToRemove);
@@ -129,8 +134,8 @@ describe('Order', function() {
                         case 'developerPayload':
                             orderBuilder.setDeveloperPayload(testNewOrderData[key]);
                             break;
-                        case 'payoutData':
-                            orderBuilder.setPayoutData(testNewOrderData[key]);
+                        case 'quote':
+                            orderBuilder.setQuote(testNewOrderData[key]);
                             break;
                         default:
                             throw new Error('Have additional property in test data ' + key);
@@ -198,6 +203,25 @@ describe('Order', function() {
                 }
 
                 assert.equal(testExistingOrderId, order.getOrderId());
+                done();
+            });
+        });
+
+        it('should load order if exists in database and get quote', function (done) {
+            var Order = require('app/order/order');
+            var Quote = require('app/payout/quote/quote');
+            var QuoteValue = require('app/payout/quote/value');
+
+            Order.load(testContext, testExistingOrderId, function (err, order) {
+                if (err) {
+                    throw err;
+                }
+
+                var quote = order.getQuote();
+                assert.equal(testExistingOrderId, order.getOrderId());
+                assert.instanceOf(quote, Quote);
+                assert.equal(quote.getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2), '100.00');
+                assert.equal(quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2), '65.00');
                 done();
             });
         });

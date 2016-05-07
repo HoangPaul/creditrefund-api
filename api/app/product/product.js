@@ -13,7 +13,7 @@ function Product(productId, value) {
 /**
  * @param {{dbDriver: object}} context
  * @param {string} productId
- * @param {function(?object, Product=) callback
+ * @param {function(?object, Product=)} callback
  */
 Product.load = function(context, productId, callback) {
     var params = {

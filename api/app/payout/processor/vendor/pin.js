@@ -1,5 +1,4 @@
-var PayoutValue = require('customer/payout-value');
-var ValidationResult = require('app/validation/result');
+var QuoteValue = require('app/payout/payout-value');
 
 var TABLE_NAME = 'payout_options';
 var PAYOUT_OPTION = 'pin';
@@ -15,7 +14,7 @@ function Pin(context, helper) {
 }
 
 /**
- * @param function(?object, boolean=) callback
+ * @param {function(?object, boolean=)} callback
  */
 Pin.prototype.isEnabled = function(callback) {
     return this.helper.isEnabled(PAYOUT_OPTION, callback);
@@ -31,11 +30,12 @@ Pin.prototype.isValidData = function(data) {
 
 /**
  * @param {Order} order
- * @param {PayoutValue} payoutValue
- * @param {function(?Error, object=) callback
+ * @param {PayoutQuote} payoutQuote
+ * @param {function(?Object, object=)} callback
  */
-Pin.prototype.sendPayment = function(order, payoutValue, callback) {
+Pin.prototype.sendPayment = function(order, callback) {
     var developerPayload = order.getDeveloperPayload();
+    var quote = order.getQuote();
 
     var recipient = {
         'email': order.getEmail(),
@@ -47,15 +47,17 @@ Pin.prototype.sendPayment = function(order, payoutValue, callback) {
         }
     };
 
-    var that = this;
+    var self = this;
     this.context.processor.pin.createRecipient(recipient, function(err, data) {
         if (err) {
             return callback(err);
         }
 
+        var payoutValue = quote.getQuoteValueByTitle(QuoteValue.PAYOUT_TITLE);
+
         var transferObject = {
-            'description': that.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
-            'amount': payoutValue.getValue(PayoutValue.CENTS),
+            'description': self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
+            'amount': payoutValue.getValue(QuoteValue.CENTS),
             'currency': 'AUD',
             'recipient': data.token
         };

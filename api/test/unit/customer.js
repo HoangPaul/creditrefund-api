@@ -23,26 +23,4 @@ describe('Customer', function() {
             done();
         });
     });
-    it('should calculate the correct payouts', function(done) {
-        var Customer = require('app/customer/customer');
-
-        Customer.load(testContext, 'asd@asd.com', function(err, customer) {
-            if (err) {
-                throw err;
-            }
-
-            var PayoutValue = require('app/customer/payout-value');
-            var totalAmount = 100;
-
-            var customerPayout = customer.calculatePayoutValue(totalAmount, PayoutValue.DOLLARS);
-            var adminPayout = customer.calculateAdminValue(totalAmount, PayoutValue.DOLLARS);
-            var googlePayout = customer.calculateGoogleValue(totalAmount, PayoutValue.DOLLARS);
-
-            assert.equal('0.00', customerPayout.getValue(PayoutValue.DOLLARS));
-            assert.equal('30.00', googlePayout.getValue(PayoutValue.DOLLARS));
-            assert.equal('70.00', adminPayout.getValue(PayoutValue.DOLLARS));
-
-            done();
-        });
-    })
 });

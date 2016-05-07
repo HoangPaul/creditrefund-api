@@ -1,4 +1,5 @@
-var PayoutValue = require('customer/payout-value');
+var QuoteValue = require('app/payout/payout-value');
+var paypal = require('paypal.js');
 
 var PAYOUT_OPTION = 'paypal';
 
@@ -13,7 +14,7 @@ function Paypal(context, helper) {
 }
 
 /**
- * @param function(?object, boolean=) callback
+ * @param {function(?object, boolean=)} callback
  */
 Paypal.prototype.isEnabled = function(callback) {
     return this.helper.isEnabled(PAYOUT_OPTION, callback);
@@ -29,29 +30,32 @@ Paypal.prototype.isValidData = function(data) {
 
 /**
  * @param {Order} order
- * @param {PayoutValue} payoutValue
- * @param {function(?Error, object=) callback
+ * @param {function(?Object, object=)} callback
  */
-Paypal.prototype.sendPayment = function(order, payoutValue, callback) {
+Paypal.prototype.sendPayment = function(order, callback) {
     var syncMode = 'true';
+    var quote = order.getQuote();
+    var payoutValue = quote.getQuoteValueByTitle(QuoteValue.PAYOUT_TITLE);
+
+    var self = this;
     var payoutObject = {
         'sender_batch_header': {
             'sender_batch_id': order.getOrderId(),
-            'email_subject': that.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
+            'email_subject': self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
         },
         'items': [{
             'recipient_type': 'EMAIL',
             'amount': {
-                'value': payoutValue.getValue(PayoutValue.DOLLARS),
+                'value': payoutValue.getValue(QuoteValue.DOLLARS),
                 'currency': 'AUD'
             },
             'receiver': order.getEmail(),
-            'note': that.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
-            'sender_item_id': order.getSignedData.productId,
+            'note': self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
+            'sender_item_id': order.getSignedData.productId
         }]
     };
 
     paypal.payout.create(payoutObject, syncMode, callback);
-}
+};
 
 module.exports = Paypal;

@@ -1,5 +1,5 @@
-var Paypal = require('app/payout/processor/paypal');
-var Pin = require('app/payout/processor/pin');
+var Paypal = require('app/payout/processor/vendor/paypal');
+var Pin = require('app/payout/processor/vendor/pin');
 
 module.exports = {
     getPaymentProcessorClass: function(processorType) {
@@ -9,7 +9,7 @@ module.exports = {
                 break;
             case 'bank':
                 return Pin;
-                break
+                break;
             default:
                 throw new Error("Unknown processor type '" + processorType + "'");
         }

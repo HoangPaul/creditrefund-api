@@ -25,6 +25,7 @@
     "paypal-rest-sdk": "^1.6.8",
     "pinjs": "github:thomasdavis/pinjs#fbed437b09a71902ae48d7e111735ad606f8d496",
     "sprintf-js": "^1.0.3",
+    "underscore": "^1.8.3",
     "validator": "^4.4.0"
   },
   "devDependencies": {

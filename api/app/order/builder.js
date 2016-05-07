@@ -1,4 +1,6 @@
 var BigNumber = require('bignumber.js');
+var Quote = require('app/payout/quote/quote');
+var us = require('underscore');
 
 /**
  * Required fields for the order object
@@ -13,7 +15,7 @@ var required = [
     'signedData',
     'timestamp',
     'developerPayload',
-    'payoutData'
+    'quote'
 ];
 
 /**
@@ -125,14 +127,14 @@ OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
 };
 
 /**
- * @param {string} developerPayload
+ * @param {string} quote
  * @return OrderBuilder
  */
-OrderBuilder.prototype.setPayoutData = function(payoutData) {
-    if (typeof payoutData !== 'object') {
-        throw new TypeError('payoutData is not an object.');
+OrderBuilder.prototype.setQuote = function(quote) {
+    if (typeof quote !== 'object') {
+        throw new TypeError('quote is not an object.');
     }
-    this.payoutData = payoutData;
+    this.quote = quote;
     return this;
 };
 
@@ -151,6 +153,11 @@ OrderBuilder.prototype.build = function() {
         throw new Error('Missing properties ' + JSON.stringify(missingProperties));
     }
 
+    if (!(this.quote instanceof Quote)) {
+        var QuoteBuilder = require('app/payout/quote/builder');
+        this.quote = QuoteBuilder.createQuoteFromQuoteData(this.quote);
+    }
+
     var Order = require('app/order/order');
 
     return new Order(
@@ -162,7 +169,7 @@ OrderBuilder.prototype.build = function() {
         this.signedData,
         this.timestamp,
         this.developerPayload,
-        this.payoutData
+        this.quote
     );
 };
 

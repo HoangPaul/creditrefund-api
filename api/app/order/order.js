@@ -1,4 +1,6 @@
 var OrderBuilder = require('app/order/builder');
+var Quote = require('app/payout/quote/quote');
+var assert = require('assert');
 
 var TABLE_NAME = 'orders';
 
@@ -11,7 +13,7 @@ var TABLE_NAME = 'orders';
  * @param {object} signedData
  * @param {number} timestamp
  * @param {object} developerPayload
- * @param {object} payoutData
+ * @param {Quote} quote
  * @class Order
  */
 function Order(
@@ -23,7 +25,14 @@ function Order(
     signedData,
     timestamp,
     developerPayload,
-    payoutData) {
+    quote) {
+    assert(typeof context === 'object');
+    assert(typeof orderId === 'string');
+    assert(typeof email === 'string');
+    assert(typeof signedData === 'object');
+    assert(typeof developerPayload === 'object');
+    assert(quote instanceof Quote);
+
     this.context = context;
     this.orderId = orderId;
     this.email = email;
@@ -32,7 +41,7 @@ function Order(
     this.signedData = signedData;
     this.timestamp = timestamp;
     this.developerPayload = developerPayload;
-    this.payoutData = payoutData;
+    this.quote = quote;
 }
 
 /**
@@ -56,6 +65,7 @@ Order.load = function(context, orderId, callback) {
         }
 
         var orderBuilder = new OrderBuilder(context);
+
         orderBuilder.setData(orderData.Item);
 
         var order = null;
@@ -93,7 +103,7 @@ Order.prototype.setIsProcessed = function(isProcessed) {
  */
 Order.prototype.setHasError = function(hasError) {
     this.hasError = hasError;
-}
+};
 
 // Getters
 
@@ -147,10 +157,10 @@ Order.prototype.getDeveloperPayload = function() {
 };
 
 /**
- * @return {Customer}
+ * @return {Quote}
  */
-Order.prototype.getPayoutData = function() {
-    return this.payoutData;
+Order.prototype.getQuote = function() {
+    return this.quote;
 };
 
 /**
@@ -165,7 +175,7 @@ Order.prototype.toObject = function() {
         'signedData': this.signedData,
         'timestamp': this.timestamp,
         'developerPayload': this.developerPayload,
-        'payoutData': this.payoutData
+        'quote': this.getQuote().toObject()
     };
 };
 
