@@ -1,4 +1,6 @@
-var TABLE_NAME = 'products'
+var BigNumber = require('bignumber.js');
+
+var TABLE_NAME = 'products';
 
 /**
  * @param {string} productId
@@ -39,10 +41,10 @@ Product.load = function(context, productId, callback) {
 }
 
 /**
- * @returns {number}
+ * @returns {BigNumber}
  */
 Product.prototype.getValue = function() {
-    return this.value;
+    return new BigNumber(this.value);
 };
 
 module.exports = Product;

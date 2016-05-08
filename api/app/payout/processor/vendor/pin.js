@@ -1,6 +1,5 @@
-var QuoteValue = require('app/payout/payout-value');
+var QuoteValue = require('app/payout/quote/value');
 
-var TABLE_NAME = 'payout_options';
 var PAYOUT_OPTION = 'pin';
 
 /**
@@ -30,7 +29,6 @@ Pin.prototype.isValidData = function(data) {
 
 /**
  * @param {Order} order
- * @param {PayoutQuote} payoutQuote
  * @param {function(?Object, object=)} callback
  */
 Pin.prototype.sendPayment = function(order, callback) {

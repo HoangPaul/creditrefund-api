@@ -1,4 +1,6 @@
 var us = require('underscore');
+var deepcopy = require('deepcopy');
+
 /**
  * @param {object} quoteValues
  * @constructor
@@ -27,6 +29,17 @@ Quote.prototype.getQuoteValueByTitle = function(title) {
         throw new Error('Missing quote value of title "' + title + '"');
     }
     return this.quoteValues[title];
+};
+
+/**
+ * @returns {QuoteValue[]}
+ */
+Quote.prototype.getFees = function() {
+    var quoteFeeValues = deepcopy(this.quoteValues);
+    delete quoteFeeValues[Quote.TOTAL_TITLE];
+    delete quoteFeeValues[Quote.PAYOUT_TITLE];
+
+    return quoteFeeValues;
 };
 
 /**

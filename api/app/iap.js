@@ -1,4 +1,3 @@
-var defaults = require('./defaults');
 var fs = require('fs');
 
 var iap = require('in-app-purchase');

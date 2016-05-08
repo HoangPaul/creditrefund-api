@@ -2,6 +2,10 @@ var Paypal = require('app/payout/processor/vendor/paypal');
 var Pin = require('app/payout/processor/vendor/pin');
 
 module.exports = {
+    /**
+     * @param processorType
+     * @return (Paypal|Pin)
+     */
     getPaymentProcessorClass: function(processorType) {
         switch (processorType) {
             case 'paypal':

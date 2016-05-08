@@ -19,7 +19,7 @@ describe('Product', function() {
                 throw err;
             }
 
-            assert.equal(2.00, product.getValue());
+            assert.equal(200, product.getValue());
             done();
         });
     });

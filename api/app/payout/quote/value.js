@@ -26,7 +26,7 @@ function QuoteValue(value, format) {
 /**
  * @const {number}
  */
-QuoteValue.DOLLARS  = 1;
+QuoteValue.DOLLARS = 1;
 
 /**
  * @const {number}

@@ -1,14 +1,15 @@
 var express = require('express');
 var router = express.Router();
 
-var apiMessages = require('app/messages').api;
-var payouts = require('payouts');
-var products = require('products');
-var orders = require('orders');
-var paypal = require('paypal');
-var iap = require('iap');
-var payoutProcessor = require('payout-processor');
+var PayoutProcessorFactory = require('app/payout/processor/factory');
+var Product = require('app/product/product');
+var FeeCollection = require('app/payout/fee/collection');
+var QuoteBuilder = require('app/payout/quote/builder');
+var QuoteValue =  require('app/payout/quote/value');
+var Quote =  require('app/payout/quote/quote');
 
+var us = require('underscore');
+var BigNumber = require('bignumber.js');
 var async = require('async');
 var crypto = require('crypto');
 var validator = require('validator');
@@ -32,15 +33,25 @@ router.use(function(req, res, next) {
     });
 });
 
+var context = {
+    dbDriver: require('app/db-driver/aws-db'),
+    config: {
+        PAYOUT: 60,
+        ADMIN: 10,
+        GOOGLE: 30,
+        IS_SENDABLE: true
+    }
+};
+
 /**
  * Expects the following data:
  * {
- *      "product_id" : string
+ *      "productId" : string
  *      "email" : string
- *      "payout_option" : ("paypal"|"bank")
- *      "account_holder_name" : string
+ *      "payoutOption" : ("paypal"|"bank")
+ *      "accountHolderName" : string
  *      "bsb" : string
- *      "account_number" : string
+ *      "accountNumber" : string
  * }
  * Where account_holder_name, bsb and account_number are requried for
  * payout option "bank"
@@ -58,9 +69,9 @@ router.post('/verify', function(req, res, next) {
 
             // Check common required fields
             var requiredFields = [
-                'product_id',
+                'productId',
                 'email',
-                'payout_option'
+                'payoutOption'
             ];
 
             for (var i = 0; i < requiredFields.length; i++) {
@@ -70,17 +81,55 @@ router.post('/verify', function(req, res, next) {
                 }
             }
 
-            return payoutProcessor.validatePayoutData(data, callback);
+            var payoutOption = data['payoutOption'];
+            try {
+                var payoutProcessor = PayoutProcessorFactory.getPaymentProcessorClass(payoutOption);
+
+                var validationResult = payoutProcessor.validatePayoutData(data);
+
+                if (validationResult.hasErrors()) {
+                    return callback(validationResult.getErrors());
+                }
+            } catch (err) {
+                return callback(err);
+            }
+
+            return callback();
         },
         function(callback) {
-            var productId = req.body.product_id;
-            return products.getProduct(productId, callback);
+            async.parallel({
+                'product': function(callback) {
+                    var productId = req.body.productId;
+                    return Product.load(context, productId, callback)
+                },
+                'fees': function(callback) {
+                    return FeeCollection.load(context, callback);
+                }
+            }, callback);
         },
-        function(productData, callback) {
-            var email = req.body.email;
-            return payouts.getPayoutInfo(email, productData.value, callback);
+        function(results, callback) {
+            var product = results['product'];
+            var fees = results['fees'];
+
+            var quoteBuilder = new QuoteBuilder(new QuoteValue(product.getValue(), QuoteValue.CENTS));
+            us.each(fees.getMandatoryFees(), function(feeData) {
+                var feeTitle = feeData['title'];
+                var percent = new BigNumber(feeData['percent']);
+                var flat = new QuoteValue(new BigNumber(feeData['flat']), QuoteValue.CENTS);
+
+                quoteBuilder.addFee(feeTitle, percent, flat);
+            });
+
+            var quote = null;
+            try {
+                quote = quoteBuilder.build();
+            } catch (err) {
+                return callback(err);
+            }
+
+            callback(quote)
         }
-    ], function(err, payoutData) {
+    ], function(err, quote) {
         if (err) {
             req.log.error({
                 err: err,
@@ -92,11 +141,17 @@ router.post('/verify', function(req, res, next) {
 
         var result = {
             status: 0,
-            message: '',
-            payout_value: payoutData.getPayoutValue(),
-            admin_value: payoutData.getAdminValue(),
-            google_value: payoutData.getGoogleValue()
+            message: ''
         };
+
+        var quoteValueFees = quote.getFees();
+        us.each(quoteValueFees, function(quoteValueFee, title) {
+            result[title] = quoteValueFee.getValue(QuoteValue.DOLLARS).toFixed(2);
+        });
+
+        result[Quote.PAYOUT_TITLE] = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
+        result[Quote.TOTAL_TITLE] = quote.getQuoteValueByTitle(Quote.TOTAL_TITLE);
+
         req.log.info(result);
         res.status(200).send(JSON.stringify(result));
     });

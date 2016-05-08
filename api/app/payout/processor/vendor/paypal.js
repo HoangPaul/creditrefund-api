@@ -1,5 +1,5 @@
-var QuoteValue = require('app/payout/payout-value');
-var paypal = require('paypal.js');
+var QuoteValue = require('app/payout/quote/value');
+var paypal = require('paypal-rest-sdk');
 
 var PAYOUT_OPTION = 'paypal';
 
