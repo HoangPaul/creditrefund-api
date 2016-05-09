@@ -8,6 +8,10 @@ var QuoteBuilder = require('app/payout/quote/builder');
 var QuoteValue =  require('app/payout/quote/value');
 var Quote =  require('app/payout/quote/quote');
 
+var PayoutProcessorHelper = require('app/payout/helper');
+
+var apiMessages = require('app/messages').api;
+
 var us = require('underscore');
 var BigNumber = require('bignumber.js');
 var async = require('async');
@@ -26,6 +30,7 @@ var log = bunyan.createLogger({
 router.use(function(req, res, next) {
     crypto.randomBytes(4, function(ex, buf) {
         var token = buf.toString('hex');
+        req.reqId = token;
         req.log = log.child({
             reqId: token
         });
@@ -33,39 +38,31 @@ router.use(function(req, res, next) {
     });
 });
 
-var context = {
-    dbDriver: require('app/db-driver/aws-db'),
-    config: {
-        PAYOUT: 60,
-        ADMIN: 10,
-        GOOGLE: 30,
-        IS_SENDABLE: true
-    }
-};
-
 /**
- * Expects the following data:
+ * Request expects the following data:
  * {
- *      "productId" : string
- *      "email" : string
- *      "payoutOption" : ("paypal"|"bank")
- *      "accountHolderName" : string
- *      "bsb" : string
- *      "accountNumber" : string
+ *      "productId": string
+ *      "email": string
+ *      "payoutOption": ("paypal"|"bank")
+ *      "accountHolderName": string
+ *      "bsb": string
+ *      "accountNumber": string
  * }
- * Where account_holder_name, bsb and account_number are requried for
+ * Where account_holder_name, bsb and account_number are required for
  * payout option "bank"
  *
+ * Result contains
+ * {
+ *      "status": number,
+ *      "message": string,
+ *      "reference: string
+ * }
  */
 router.post('/verify', function(req, res, next) {
+    var context = req.context;
     async.waterfall([
         function(callback) {
             var data = req.body;
-
-            // Check email
-            if (!validator.isEmail(data['email'])) {
-                return callback(new Error('Malformed email "' + data['email'] + '"'));
-            }
 
             // Check common required fields
             var requiredFields = [
@@ -74,21 +71,27 @@ router.post('/verify', function(req, res, next) {
                 'payoutOption'
             ];
 
-            for (var i = 0; i < requiredFields.length; i++) {
-                var requiredField = requiredFields[i];
-                if (typeof data[requiredField] === 'undefined' || !data[requiredField]) {
-                    return callback(new Error('Missing required field "' + requiredField + '"'));
-                }
+            var payoutProcessorHelper = new PayoutProcessorHelper(context);
+            var validationResult = payoutProcessorHelper.hasRequiredData(data, requiredFields);
+
+            if (validationResult.hasErrors()) {
+                console.log(validationResult.getErrors('. '));
+                return callback(validationResult.getErrors('. '));
+            }
+
+            // Check email
+            if (!validator.isEmail(data['email'])) {
+                return callback(new Error('Malformed email ' + data['email']));
             }
 
             var payoutOption = data['payoutOption'];
             try {
-                var payoutProcessor = PayoutProcessorFactory.getPaymentProcessorClass(payoutOption);
+                var payoutProcessorClass = PayoutProcessorFactory.getPaymentProcessorClass(payoutOption);
+                var payoutProcessor = new payoutProcessorClass(context, payoutProcessorHelper);
+                var payoutValidationResult = payoutProcessor.isValidData(data);
 
-                var validationResult = payoutProcessor.validatePayoutData(data);
-
-                if (validationResult.hasErrors()) {
-                    return callback(validationResult.getErrors());
+                if (payoutValidationResult.hasErrors()) {
+                    return callback(payoutValidationResult.getErrors('. '));
                 }
             } catch (err) {
                 return callback(err);
@@ -127,7 +130,7 @@ router.post('/verify', function(req, res, next) {
                 return callback(err);
             }
 
-            callback(quote)
+            callback(null, quote)
         }
     ], function(err, quote) {
         if (err) {
@@ -136,7 +139,13 @@ router.post('/verify', function(req, res, next) {
                 req: req,
                 body: req.body
             });
-            return next(apiMessages.DEFAULT_ERROR);
+            if (err instanceof Error) {
+                return next(err.message);
+            } else if (typeof err === 'string') {
+                return next(err);
+            } else {
+                return(apiMessages.DEFAULT_ERROR_TEMPLATE());
+            }
         }
 
         var result = {
@@ -149,8 +158,8 @@ router.post('/verify', function(req, res, next) {
             result[title] = quoteValueFee.getValue(QuoteValue.DOLLARS).toFixed(2);
         });
 
-        result[Quote.PAYOUT_TITLE] = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
-        result[Quote.TOTAL_TITLE] = quote.getQuoteValueByTitle(Quote.TOTAL_TITLE);
+        result[Quote.PAYOUT_TITLE] = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
+        result[Quote.TOTAL_TITLE] = quote.getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
 
         req.log.info(result);
         res.status(200).send(JSON.stringify(result));
@@ -292,20 +301,6 @@ router.post('/confirm', function(req, res, next) {
     });
 });
 
-router.post('/test', function(req, res, next) {
-    var orderId = req.body.order_id;
-    orders.getOrder(orderId, function(err, order) {
-        return orders.flagOrderSuccess(order, function(err, response) {
-            if (err) {
-                res.send('Failed!');
-                return console.log(err);
-            }
-            res.send('Success!');
-            return console.log(response);
-        });
-    });
-});
-
 router.use(function(req, res, next) {
     res.status(403).send();
 });
@@ -316,9 +311,19 @@ router.use(function(err, req, res, next) {
 });
 
 router.use(function(err, req, res, next) {
-    res.status(400).send(JSON.stringify({
-        error: err
-    }))
+    if (typeof err === 'string') {
+        err = {
+            'message': err
+        };
+    }
+    if (typeof err === 'object') {
+        err = us.extend({
+            'status': -1,
+            'message': apiMessages.DEFAULT_ERROR_TEMPLATE(),
+            'reference': req.reqId
+        }, err);
+    }
+    res.status(400).send(JSON.stringify(err, null, 2));
 });
 
 module.exports = router;

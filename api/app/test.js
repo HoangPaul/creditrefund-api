@@ -1,11 +1,5 @@
 var context = {
     dbDriver: require('app/db-driver/aws-db'),
-    config: {
-        PAYOUT: 60,
-        ADMIN: 10,
-        GOOGLE: 30,
-        IS_SENDABLE: true
-    },
     payoutMessages: {
         REFERENCE_NUMBER_TEMPLATE: function() {/* todo */}
     },

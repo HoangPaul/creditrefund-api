@@ -24,7 +24,7 @@ Pin.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Pin.prototype.isValidData = function(data) {
-    return this.helper.isValidData(PAYOUT_OPTION, data, ['accountHolderName', 'bsb', 'accountNumber']);
+    return this.helper.hasRequiredData(data, ['accountHolderName', 'bsb', 'accountNumber']);
 };
 
 /**

@@ -1,8 +1,6 @@
 var assert = require('chai').assert;
 
-var testContext = {
-    dbDriver: require('app/db-driver/aws-db')
-};
+var testContext = require('../../testContext');
 
 describe('Payout Helper', function() {
     this.timeout(0);
@@ -65,7 +63,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidData(testPayoutOption, data, required);
+            var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -86,7 +84,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidData(testPayoutOption, data, required);
+            var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -105,7 +103,7 @@ describe('Payout Helper', function() {
             };
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidData(testPayoutOption, data, required);
+            var result = payoutHelper.hasRequiredData( data, required);
 
             assert.isTrue(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -121,7 +119,7 @@ describe('Payout Helper', function() {
             var data = {};
             var required = ['a', 'b', 'c'];
 
-            var result = payoutHelper.isValidData(testPayoutOption, data, required);
+            var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isTrue(result.hasErrors());
             assert.isArray(result.getErrors());
@@ -140,7 +138,7 @@ describe('Payout Helper', function() {
             };
             var required = [];
 
-            var result = payoutHelper.isValidData(testPayoutOption, data, required);
+            var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
             assert.isArray(result.getErrors());

@@ -1,3 +1,5 @@
+var assert = require('assert');
+
 var TABLE_NAME = 'customers';
 
 /**
@@ -6,8 +8,11 @@ var TABLE_NAME = 'customers';
  * @constructor
  */
 function Customer(email, isSendable) {
+    assert(typeof email === 'string');
+    assert(typeof isSendable === 'boolean');
+
     this.email = email;
-    this.isSendable = isSendable || true;
+    this.isSendable = isSendable;
 }
 
 /**
@@ -28,13 +33,7 @@ Customer.load = function(context, email, callback) {
             return callback(err);
         }
 
-        var isSendable = context.config.IS_SENDABLE;
-
-        if (typeof dbData.Item !== 'undefined') {
-            isSendable = dbData.Item['is_sendable'];
-        }
-
-        var customer = new Customer(email, isSendable);
+        var customer = new Customer(email, dbData.Item['isSendable']);
 
         return callback(null, customer);
     });
@@ -67,7 +66,6 @@ Customer.prototype.toString = function() {
 Customer.prototype.toObject = function() {
     return {
         'email': this.email,
-        'percentages': this.percentages,
         'isSendable': this.isSendable
     };
 };

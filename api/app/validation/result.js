@@ -1,3 +1,5 @@
+var us = require('underscore');
+
 function ValidationResult() {
     this.errors = [];
 }
@@ -17,10 +19,18 @@ ValidationResult.prototype.hasErrors = function() {
 };
 
 /**
- * @returns {Error[]}
+ * @returns {Error[]|string}
  */
-ValidationResult.prototype.getErrors = function() {
-    return this.errors;
+ValidationResult.prototype.getErrors = function(delimiter) {
+    if (typeof delimiter === 'undefined') {
+        return this.errors;
+    }
+
+    var errorMessages = us.map(this.errors, function(error) {
+        return error.message;
+    });
+
+    return errorMessages.join(delimiter);
 };
 
 module.exports = ValidationResult;

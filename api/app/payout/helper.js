@@ -32,11 +32,11 @@ PayoutHelper.prototype.isEnabled = function(payoutOption, callback) {
 };
 
 /**
- * @param {string} payoutOption
  * @param {object} data
  * @param {string[]} requiredFields
+ * @returns {ValidationResult}
  */
-PayoutHelper.prototype.isValidData = function(payoutOption, data, requiredFields) {
+PayoutHelper.prototype.hasRequiredData = function(data, requiredFields) {
     var validationResult = new ValidationResult();
 
     for (var i = 0; i < requiredFields.length; i++) {

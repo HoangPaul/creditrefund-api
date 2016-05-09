@@ -1,14 +1,6 @@
 var assert = require('chai').assert;
 
-var testContext = {
-    dbDriver: require('app/db-driver/aws-db'),
-    config: {
-        PAYOUT: 60,
-        ADMIN: 10,
-        GOOGLE: 30,
-        IS_SENDABLE: true
-    }
-};
+var testContext = require('../testContext');
 
 describe('Customer', function() {
     it('should load customer if exists in database', function(done) {
@@ -20,6 +12,34 @@ describe('Customer', function() {
             }
 
             assert.equal('asd@asd.com', customer.getEmail());
+            done();
+        });
+    });
+
+    it('should load non-sendable customer', function(done) {
+        var Customer = require('app/customer/customer');
+
+        Customer.load(testContext, 'asd@asd.com', function(err, customer) {
+            if (err) {
+                throw err;
+            }
+
+            assert.equal('asd@asd.com', customer.getEmail());
+            assert.isFalse(customer.getIsSendable());
+            done();
+        });
+    });
+
+    it('should load sendable customer', function(done) {
+        var Customer = require('app/customer/customer');
+
+        Customer.load(testContext, 'qwe@qwe.com', function(err, customer) {
+            if (err) {
+                throw err;
+            }
+
+            assert.equal('qwe@qwe.com', customer.getEmail());
+            assert.isTrue(customer.getIsSendable());
             done();
         });
     });

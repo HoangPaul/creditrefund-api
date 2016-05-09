@@ -3,9 +3,7 @@ var deepcopy = require('deepcopy');
 
 var testExistingOrderId = 'GPA.1361-0852-2559-97342';
 var testNewOrderId = 'GPA.1361-0852-2559-97343';
-var testContext = {
-    'dbDriver': require('app/db-driver/aws-db')
-};
+var testContext = require('../testContext');
 
 var testOrderData = {
     "developerPayload": {

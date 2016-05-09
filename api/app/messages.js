@@ -4,13 +4,14 @@ var sprintf = require("sprintf-js").sprintf;
 var referenceNumberTemplate = 'Reference Number: "%s"';
 
 // Error messages
-var defaultErrorMessage = sprintf('Oops! Something went wrong. Help us improve your experience by sending an error report to %s', 'asd@asd.com');
+var defaultErrorMessage = 'Oops! Something went wrong. Help us improve your experience by sending an error report to %s.';
 var confirmErrorMessage = 'Oops! Something went wrong. Our technical staff have been notified of the issue and will be looking into this with the utmost urgency.';
 
 module.exports = {
     api : {
-    	DEFAULT_ERROR : defaultErrorMessage,
-    	CONFIRM_ERROR : confirmErrorMessage
+        DEFAULT_ERROR_TEMPLATE: function() {
+            return sprintf(defaultErrorMessage, 'asd@asd.com');
+        }
     },
     payout : {
         REFERENCE_NUMBER_TEMPLATE : function(data) {

@@ -1,9 +1,7 @@
 var assert = require('chai').assert;
 var us = require('underscore');
 
-var testContext = {
-    'dbDriver': require('app/db-driver/aws-db')
-};
+var testContext = require('../../testContext');
 
 describe('Fee', function() {
     it('should load fees from database', function(done) {

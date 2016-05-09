@@ -1,5 +1,4 @@
 var QuoteValue = require('app/payout/quote/value');
-var paypal = require('paypal-rest-sdk');
 
 var PAYOUT_OPTION = 'paypal';
 
@@ -25,7 +24,7 @@ Paypal.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Paypal.prototype.isValidData = function(data) {
-    return this.helper.isValidData(PAYOUT_OPTION, data, ['email']);
+    return this.helper.hasRequiredData(data, ['email']);
 };
 
 /**
@@ -55,7 +54,7 @@ Paypal.prototype.sendPayment = function(order, callback) {
         }]
     };
 
-    paypal.payout.create(payoutObject, syncMode, callback);
+    this.context.processor.paypal.payout.create(payoutObject, syncMode, callback);
 };
 
 module.exports = Paypal;

@@ -1,14 +1,24 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var api = require('app/api');
+
 app.disable('x-powered-by');
 
-var api = require('app/api');
+app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
     res.send('Hello World!');
 });
-app.use(bodyParser.json());
+
+app.use('/api', function(req, res, next) {
+    req.context = {
+        dbDriver: require('app/db-driver/aws-db')
+    };
+
+    next();
+});
+
 app.use('/api', api);
 
 var server = app.listen(3000, function () {
