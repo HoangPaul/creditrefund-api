@@ -1,3 +1,4 @@
+var Quote = require('app/payout/quote/quote');
 var QuoteValue = require('app/payout/quote/value');
 
 var PAYOUT_OPTION = 'pin';
@@ -37,11 +38,11 @@ Pin.prototype.sendPayment = function(order, callback) {
 
     var recipient = {
         'email': order.getEmail(),
-        'name': developerPayload.account_holder_name,
+        'name': developerPayload.accountHolderName,
         'bank_account': {
-            'name': developerPayload.account_holder_name,
+            'name': developerPayload.accountHolderName,
             'bsb': developerPayload.bsb,
-            'number': developerPayload.account_number
+            'number': developerPayload.accountNumber
         }
     };
 
@@ -51,18 +52,17 @@ Pin.prototype.sendPayment = function(order, callback) {
             return callback(err);
         }
 
-        var payoutValue = quote.getQuoteValueByTitle(QuoteValue.PAYOUT_TITLE);
+        var payoutValue = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
 
         var transferObject = {
-            'description': self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
-            'amount': payoutValue.getValue(QuoteValue.CENTS),
+            'description': order.getOrderId(), // todo: self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
+            'amount': payoutValue.getValue(QuoteValue.CENTS).toFixed(0),
             'currency': 'AUD',
             'recipient': data.token
         };
 
-        pin.createTransfer(transferObject, callback);
+        self.context.processor.pin.createTransfer(transferObject, callback);
     });
-
-}
+};
 
 module.exports = Pin;

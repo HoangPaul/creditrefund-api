@@ -8,7 +8,9 @@ var BigNumber = require('bignumber.js');
  * @constructor
  */
 function QuoteValue(value, format) {
-    assert(value instanceof BigNumber);
+    if (!(value instanceof BigNumber)) {
+        throw new TypeError('Value is not of type BigNumber');
+    }
 
     switch (format) {
         case QuoteValue.DOLLARS:

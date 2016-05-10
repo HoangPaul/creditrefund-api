@@ -4,7 +4,10 @@ var PAYOUT_OPTION = 'paypal';
 
 /**
  * @param {{dbDriver: object, processor: object}} context
- * @param {object} helper
+ * @param {{
+ *      isEnabled: function(string, function(?Object, boolean=)),
+ *      hasRequiredData: function(string, string[])
+ *  }} helper
  * @constructor
  */
 function Paypal(context, helper) {

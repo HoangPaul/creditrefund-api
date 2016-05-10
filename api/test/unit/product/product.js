@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 
-var testContext = require('../testContext');
+var testContext = require('../../testContext');
 
 describe('Product', function() {
     it('should load product if exists in database', function(done) {

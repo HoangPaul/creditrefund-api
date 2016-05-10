@@ -115,7 +115,7 @@ OrderBuilder.prototype.setTimestamp = function(timestamp) {
 };
 
 /**
- * @param {string} developerPayload
+ * @param {Object} developerPayload
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
@@ -127,7 +127,7 @@ OrderBuilder.prototype.setDeveloperPayload = function(developerPayload) {
 };
 
 /**
- * @param {string} quote
+ * @param {Quote} quote
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setQuote = function(quote) {

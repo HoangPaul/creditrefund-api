@@ -1,21 +1,28 @@
 var Paypal = require('app/payout/processor/vendor/paypal');
 var Pin = require('app/payout/processor/vendor/pin');
+var us = require('underscore');
+
+var processorOptions = {
+    'paypal': Paypal,
+    'pin': Pin
+};
 
 module.exports = {
     /**
-     * @param processorType
+     * @returns {string[]}
+     */
+    getAvailableOptions: function() {
+        return us.keys(processorOptions);
+    },
+    /**
+     * @param {string} processorType
      * @return (Paypal|Pin)
      */
     getPaymentProcessorClass: function(processorType) {
-        switch (processorType) {
-            case 'paypal':
-                return Paypal;
-                break;
-            case 'bank':
-                return Pin;
-                break;
-            default:
-                throw new Error("Unknown processor type '" + processorType + "'");
+        if (typeof processorOptions[processorType] === 'undefined') {
+            throw new Error("Unknown processor type '" + processorType + "'");
         }
+
+        return processorOptions[processorType];
     }
 };

@@ -2,7 +2,7 @@ var us = require('underscore');
 var deepcopy = require('deepcopy');
 
 /**
- * @param {object} quoteValues
+ * @param {QuoteValue[]} quoteValues
  * @constructor
  */
 function Quote(quoteValues) {
