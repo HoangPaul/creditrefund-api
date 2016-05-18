@@ -1,9 +1,10 @@
 var assert = require('chai').assert;
 var us = require('underscore');
 
-var Paypal = require('app/payout/processor/vendor/paypal');
 var Pin = require('app/payout/processor/vendor/pin');
 var PayoutProcessorFactory = require('app/payout/processor/factory');
+var Paypal = require('app/payout/processor/vendor/paypal');
+var PaypalMassPayments = require('app/payout/processor/vendor/paypal-mass-payments');
 
 describe('Payout Processor Factory', function() {
     it('all options should be loadable', function() {
@@ -23,10 +24,11 @@ describe('Payout Processor Factory', function() {
         });
     });
 
-    it('should load paypal class', function() {
+    it('should load paypal mass payments class', function() {
         var payoutClass = PayoutProcessorFactory.getPaymentProcessorClass('paypal');
 
-        assert.deepEqual(payoutClass, Paypal);
+        assert.deepEqual(payoutClass, PaypalMassPayments);
+        assert.notDeepEqual(payoutClass, Paypal);
         assert.notDeepEqual(payoutClass, Pin);
     });
 
@@ -35,6 +37,7 @@ describe('Payout Processor Factory', function() {
 
         assert.deepEqual(payoutClass, Pin);
         assert.notDeepEqual(payoutClass, Paypal);
+        assert.notDeepEqual(payoutClass, PaypalMassPayments);
     });
 
     it('should throw error when cannot load class', function() {

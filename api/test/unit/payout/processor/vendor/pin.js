@@ -13,7 +13,7 @@ var QuoteValue = require('app/payout/quote/value');
 
 var testContext = require('../../../../testContext');
 var testSecretData = require('../../../../testSecretData');
-var testExistingOrderId = 'GPA.1361-0852-2559-97342';
+var testExistingOrderId = 'test' + Date.now();
 
 describe('Payout Processor Pin Payments', function() {
     var data = {

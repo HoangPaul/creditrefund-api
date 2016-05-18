@@ -1,7 +1,8 @@
 var QuoteValue = require('app/payout/quote/value');
 var Quote = require('app/payout/quote/quote');
+var us = require('underscore');
 
-var PAYOUT_OPTION = 'paypal';
+var PAYOUT_OPTION = 'paypalMassPayments';
 
 /**
  * @param {{dbDriver: object, processor: object}} context
@@ -36,29 +37,24 @@ Paypal.prototype.isValidData = function(data) {
  * @param {function(?Object, object=)} callback
  */
 Paypal.prototype.sendPayment = function(order, callback) {
-    var syncMode = 'true';
     var quote = order.getQuote();
     var payoutValue = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
 
-    var self = this;
-    var payoutObject = {
-        'sender_batch_header': {
-            'sender_batch_id': order.getOrderId(),
-            'email_subject': 'test paypal subject' // todo: self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
-        },
-        'items': [{
-            'recipient_type': 'EMAIL',
-            'amount': {
-                'value': payoutValue.getValue(QuoteValue.DOLLARS).toFixed(2),
-                'currency': 'AUD'
-            },
-            'receiver': order.getEmail(),
-            'note': 'test paypal note',// todo: self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
-            'sender_item_id': order.getSignedData.productId
-        }]
+    var data = {
+        "RECEIVERTYPE": "EmailAddress",
+        'CURRENCYCODE': 'AUD'
     };
 
-    this.context.processor.paypal.payout.create(payoutObject, syncMode, callback);
+    var recipients = {
+        'L_EMAIL0': order.getEmail(),
+        'L_AMT0': payoutValue.getValue(QuoteValue.DOLLARS).toFixed(2),
+        'L_UNIQUEID0': order.getOrderId(),
+        'L_NOTE0': 'test paypal note'
+    };
+
+    data = us.extend(data, recipients);
+
+    this.context.processor.paypalMassPayments.send(data, callback);
 };
 
 module.exports = Paypal;

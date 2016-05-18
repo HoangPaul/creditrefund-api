@@ -90,7 +90,7 @@ OrderBuilder.prototype.setIsProcessed = function(isProcessed) {
 };
 
 /**
- * @param {string} signedData
+ * @param {Object} signedData
  * @return OrderBuilder
  */
 OrderBuilder.prototype.setSignedData = function(signedData) {

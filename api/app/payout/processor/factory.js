@@ -1,9 +1,10 @@
 var Paypal = require('app/payout/processor/vendor/paypal');
+var PaypalMassPayments = require('app/payout/processor/vendor/paypal-mass-payments');
 var Pin = require('app/payout/processor/vendor/pin');
 var us = require('underscore');
 
 var processorOptions = {
-    'paypal': Paypal,
+    'paypal': PaypalMassPayments,
     'pin': Pin
 };
 
