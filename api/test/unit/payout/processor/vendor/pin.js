@@ -22,6 +22,10 @@ describe('Payout Processor Pin Payments', function() {
         'accountNumber': testSecretData.accountNumber
     };
 
+    it('should have processor title', function() {
+        assert.equal('Pin', Pin.PROCESSOR_TITLE);
+    });
+
     describe('Validation', function() {
         it('should validate account holder, bsb and account number', function() {
             var helper = new PayoutHelper(testContext);

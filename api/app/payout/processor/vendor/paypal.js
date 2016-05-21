@@ -17,6 +17,11 @@ function Paypal(context, helper) {
 }
 
 /**
+ * @type {string}
+ */
+Paypal.PROCESSOR_TITLE = 'Paypal';
+
+/**
  * @param {function(?object, boolean=)} callback
  */
 Paypal.prototype.isEnabled = function(callback) {

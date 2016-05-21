@@ -15,6 +15,7 @@ module.exports = {
     getAvailableOptions: function() {
         return us.keys(processorOptions);
     },
+
     /**
      * @param {string} processorType
      * @return (Paypal|Pin)

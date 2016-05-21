@@ -24,6 +24,19 @@ describe('Payout Processor Factory', function() {
         });
     });
 
+    it('all options should have process title property and isValid and isEnabled methods', function() {
+        var processorOptions = PayoutProcessorFactory.getAvailableOptions();
+
+        us.each(processorOptions, function(option) {
+            assert.isString(option);
+            var processorClass = PayoutProcessorFactory.getPaymentProcessorClass(option);
+            var processorClassInstance = new processorClass({}, {});
+            assert.property(processorClass, 'PROCESSOR_TITLE', option);
+            assert.isFunction(processorClassInstance.isEnabled, option);
+            assert.isFunction(processorClassInstance.isValidData, option);
+        });
+    });
+
     it('should load paypal mass payments class', function() {
         var payoutClass = PayoutProcessorFactory.getPaymentProcessorClass('paypal');
 

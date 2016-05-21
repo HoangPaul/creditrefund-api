@@ -14,6 +14,11 @@ function Pin(context, helper) {
 }
 
 /**
+ * @type {string}
+ */
+Pin.PROCESSOR_TITLE = 'Bank (Pin Payments)';
+
+/**
  * @param {function(?object, boolean=)} callback
  */
 Pin.prototype.isEnabled = function(callback) {

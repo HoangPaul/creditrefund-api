@@ -20,6 +20,10 @@ describe('Payout Processor Paypal Payments', function() {
         'email': 'testpaypalpayout@example.com',
     };
 
+    it('should have processor title', function() {
+        assert.equal('Paypal', Paypal.PROCESSOR_TITLE);
+    });
+
     describe('Validation', function() {
         it('should validate email', function() {
             var helper = new PayoutHelper(testContext);
