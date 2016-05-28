@@ -1,4 +1,5 @@
 var BigNumber = require('bignumber.js');
+var ProductError = require('app/product/error');
 
 var TABLE_NAME = 'products';
 
@@ -31,7 +32,7 @@ Product.load = function(context, productId, callback) {
         }
 
         if (typeof dbData.Item === 'undefined') {
-            return callback(new Error('Failed to retrieve product, got a non-single result.'));
+            return callback(new ProductError('We cannot convert this value.'));
         }
 
         var product = new Product(dbData.Item.productId, dbData.Item.value);

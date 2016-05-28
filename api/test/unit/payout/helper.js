@@ -66,8 +66,8 @@ describe('Payout Helper', function() {
             var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
-            assert.isArray(result.getErrors());
-            assert.lengthOf(result.getErrors(), 0);
+            assert.isArray(result.getErrorMessages());
+            assert.lengthOf(result.getErrorMessages(), 0);
             done();
         });
 
@@ -87,8 +87,8 @@ describe('Payout Helper', function() {
             var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
-            assert.isArray(result.getErrors());
-            assert.lengthOf(result.getErrors(), 0);
+            assert.isArray(result.getErrorMessages());
+            assert.lengthOf(result.getErrorMessages(), 0);
             done();
         });
 
@@ -106,8 +106,8 @@ describe('Payout Helper', function() {
             var result = payoutHelper.hasRequiredData( data, required);
 
             assert.isTrue(result.hasErrors());
-            assert.isArray(result.getErrors());
-            assert.lengthOf(result.getErrors(), 1);
+            assert.isArray(result.getErrorMessages());
+            assert.lengthOf(result.getErrorMessages(), 1);
             done();
         });
 
@@ -122,8 +122,8 @@ describe('Payout Helper', function() {
             var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isTrue(result.hasErrors());
-            assert.isArray(result.getErrors());
-            assert.lengthOf(result.getErrors(), 3);
+            assert.isArray(result.getErrorMessages());
+            assert.lengthOf(result.getErrorMessages(), 3);
             done();
         });
 
@@ -141,8 +141,8 @@ describe('Payout Helper', function() {
             var result = payoutHelper.hasRequiredData(data, required);
 
             assert.isFalse(result.hasErrors());
-            assert.isArray(result.getErrors());
-            assert.lengthOf(result.getErrors(), 0);
+            assert.isArray(result.getErrorMessages());
+            assert.lengthOf(result.getErrorMessages(), 0);
             done();
         });
     });

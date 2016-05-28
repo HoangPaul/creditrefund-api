@@ -12,6 +12,8 @@ var Customer = require('app/customer/customer');
 var PayoutProcessorHelper = require('app/payout/helper');
 
 var Iap = require('app/iap');
+var VisibleError = require('app/error/visible');
+var ValidationError = require('app/validation/error');
 
 var apiMessages = require('app/messages').api;
 
@@ -84,13 +86,20 @@ router.post('/verify', function(req, res, next) {
             var validationResult = payoutProcessorHelper.hasRequiredData(data, requiredFields);
 
             if (validationResult.hasErrors()) {
-                console.log(validationResult.getErrors('. '));
-                return callback(validationResult.getErrors('. '));
+                return callback(
+                    new ValidationError(
+                        validationResult.getErrorMessages('. ')
+                    )
+                );
             }
 
             // Check email
             if (!validator.isEmail(data['email'])) {
-                return callback(new Error('Malformed email ' + data['email']));
+                return callback(
+                    new ValidationError(
+                        new Error('Malformed email ' + data['email'])
+                    )
+                );
             }
 
             var payoutOption = data['payoutOption'];
@@ -100,7 +109,11 @@ router.post('/verify', function(req, res, next) {
                 var payoutValidationResult = payoutProcessor.isValidData(data);
 
                 if (payoutValidationResult.hasErrors()) {
-                    return callback(payoutValidationResult.getErrors('. '));
+                    return callback(
+                        new ValidationError(
+                            payoutValidationResult.getErrorMessages('. ')
+                        )
+                    );
                 }
             } catch (err) {
                 return callback(err);
@@ -119,18 +132,8 @@ router.post('/verify', function(req, res, next) {
          */
         function(err, quote) {
             if (err) {
-                req.log.error({
-                    err: err,
-                    req: req,
-                    body: req.body
-                });
-                if (err instanceof Error) {
-                    return next(err.message);
-                } else if (typeof err === 'string') {
-                    return next(err);
-                } else {
-                    return(apiMessages.DEFAULT_ERROR_TEMPLATE());
-                }
+                req.log.error({err: err, req: req});
+                return next(err);
             }
 
             var result = {
@@ -403,17 +406,20 @@ router.use(function(err, req, res, next) {
 });
 
 router.use(function(err, req, res, next) {
-    if (typeof err === 'string') {
+    if (err instanceof VisibleError) {
+        // Visible errors are viewable to the world
         err = {
-            'message': err
-        };
-    }
-    if (typeof err === 'object') {
-        err = us.extend({
-            'status': -1,
+            'status': err.errorCode,
+            'message': err.message,
+            'reference': req.reqId
+        }
+    } else {
+        // Some random error that we're not suppose to show the world
+        err = {
+            'status': 4000,
             'message': apiMessages.DEFAULT_ERROR_TEMPLATE(),
             'reference': req.reqId
-        }, err);
+        }
     }
     res.status(400).send(JSON.stringify(err, null, 2));
 });

@@ -21,7 +21,7 @@ ValidationResult.prototype.hasErrors = function() {
 /**
  * @returns {Error[]|string}
  */
-ValidationResult.prototype.getErrors = function(delimiter) {
+ValidationResult.prototype.getErrorMessages = function(delimiter) {
     if (typeof delimiter === 'undefined') {
         return this.errors;
     }

@@ -23,7 +23,7 @@ describe('Payout Processor Pin Payments', function() {
     };
 
     it('should have processor title', function() {
-        assert.equal('Pin', Pin.PROCESSOR_TITLE);
+        assert.property(Pin, 'PROCESSOR_TITLE');
     });
 
     describe('Validation', function() {

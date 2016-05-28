@@ -1,5 +1,6 @@
 var Quote = require('app/payout/quote/quote');
 var QuoteValue = require('app/payout/quote/value');
+var QuoteError = require('app/payout/quote/error');
 var BigNumber = require('bignumber.js');
 var us = require('underscore');
 var assert = require('assert');
@@ -94,7 +95,7 @@ function buildQuoteFromAbsolute(quoteFees, qTotalAmount) {
     us.each(quoteFees, function(quoteFee) {
         bRunningFeeTotal = bRunningFeeTotal.add(quoteFee.getValue(QuoteValue.CENTS));
         if (bRunningFeeTotal.greaterThanOrEqualTo(bTotalAmount)) {
-            throw new Error('Running fee total ' + bRunningFeeTotal.toString() + ' is greater than total amount '
+            throw new QuoteError('Running fee total ' + bRunningFeeTotal.toString() + ' is greater than total amount '
                 + bTotalAmount.toString());
         }
     });

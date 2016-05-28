@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var deepcopy = require('deepcopy');
+var QuoteError = require('app/payout/quote/error');
 
 describe('QuoteBuilder', function() {
     it('should build the correct quote for easy values [CENTS]', function() {
@@ -82,7 +83,7 @@ describe('QuoteBuilder', function() {
         assert.equal(quote.getQuoteValueByTitle('Admin Fee').getValue(QuoteValue.CENTS).toFixed(0), '500');
     });
 
-    it('should throw error if fee is greater than total', function() {
+    it('should throw QuoteError if fee is greater than total', function() {
         var QuoteBuilder = require('app/payout/quote/builder');
         var QuoteValue  = require('app/payout/quote/value');
         var BigNumber = require('bignumber.js');
@@ -92,10 +93,10 @@ describe('QuoteBuilder', function() {
 
         quoteBuilder.addFee('Google Fee', new BigNumber(30), new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
 
-        assert.throws(quoteBuilder.build.bind(quoteBuilder), 'is greater than total amount');
+        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError, 'is greater than total amount');
     });
 
-    it('should throw error if fee is equal to total', function() {
+    it('should throw QuoteError if fee is equal to total', function() {
         var QuoteBuilder = require('app/payout/quote/builder');
         var QuoteValue  = require('app/payout/quote/value');
         var BigNumber = require('bignumber.js');
@@ -105,10 +106,10 @@ describe('QuoteBuilder', function() {
 
         quoteBuilder.addFee('Google Fee', new BigNumber(0), new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
 
-        assert.throws(quoteBuilder.build.bind(quoteBuilder), 'is greater than total amount');
+        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError, 'is greater than total amount');
     });
 
-    it('should not throw error if fee is 1 cent under total', function() {
+    it('should not throw any error if fee is 1 cent under total', function() {
         var QuoteBuilder = require('app/payout/quote/builder');
         var QuoteValue  = require('app/payout/quote/value');
         var Quote = require('app/payout/quote/quote');
