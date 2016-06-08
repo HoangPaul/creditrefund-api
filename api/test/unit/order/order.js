@@ -243,7 +243,10 @@ describe('Order', function() {
                         throw saveErr;
                     }
 
-                    done();
+                    Order.load(testContext, testExistingOrderId, function (err, orderReloaded) {
+                        assert.equal(true, orderReloaded.getIsProcessed());
+                        done();
+                    });
                 });
             });
         });

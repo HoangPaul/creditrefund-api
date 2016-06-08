@@ -1,4 +1,5 @@
 var assert = require('assert');
+var us = require('underscore');
 
 var TABLE_NAME = 'customers';
 
@@ -31,6 +32,10 @@ Customer.load = function(context, email, callback) {
     context.dbDriver.get(params, function(err, dbData) {
         if (err) {
             return callback(err);
+        }
+
+        if (us.size(dbData) === 0) {
+            return callback(new Error('Cannot find customer with email "' + email + '"'));
         }
 
         var customer = new Customer(email, dbData.Item['isSendable']);

@@ -3,6 +3,14 @@ var bodyParser = require('body-parser');
 var app = express();
 var api = require('app/api');
 
+var secret = require('app/secret');
+
+var Pin = require('pinjs');
+var pin = Pin.setup(secret.pin);
+
+var PaypalMassPayments = require('lib/paypal-mass-payments');
+var paypalMassPayments = new PaypalMassPayments(secret.paypalMassPayments);
+
 app.disable('x-powered-by');
 
 app.use(bodyParser.json());
@@ -13,7 +21,16 @@ app.get('/', function (req, res) {
 
 app.use('/api', function(req, res, next) {
     req.context = {
-        dbDriver: require('app/db-driver/aws-db')
+        'dbDriver': require('app/db-driver/aws-db'),
+        'processor': {
+            'pin': pin,
+            'paypalMassPayments': paypalMassPayments
+        },
+        'platform': {
+            'google': {
+                'googlePublicKeyPath': '/app/.key/'
+            }
+        }
     };
 
     next();

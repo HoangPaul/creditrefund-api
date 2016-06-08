@@ -8,6 +8,8 @@ var QuoteBuilder = require('app/payout/quote/builder');
 var QuoteValue =  require('app/payout/quote/value');
 var Quote =  require('app/payout/quote/quote');
 var Customer = require('app/customer/customer');
+var Order = require('app/order/order');
+var OrderBuilder = require('app/order/builder');
 
 var PayoutProcessorHelper = require('app/payout/helper');
 
@@ -18,6 +20,7 @@ var ValidationError = require('app/validation/error');
 var apiMessages = require('app/messages').api;
 
 var us = require('underscore');
+var assert = require('assert');
 var BigNumber = require('bignumber.js');
 var async = require('async');
 var crypto = require('crypto');
@@ -189,7 +192,11 @@ router.post('/verify', function(req, res, next) {
  *
  */
 router.post('/confirm', function(req, res, next) {
-    fs.writeFile('../logs/' + Date.now().toString(), JSON.stringify(req.body), 'utf-8', function(){});
+    fs.writeFile('./logs/' + Date.now().toString(), JSON.stringify(req.body), 'utf-8', function(err){
+        if (err) {
+            console.log(err);
+        }
+    });
 
     var context = req.context;
     var iap = new Iap(context);
@@ -218,13 +225,7 @@ router.post('/confirm', function(req, res, next) {
          */
         function(iapSignedData, callback) {
             var productId = signedData['productId'];
-            var payoutOption = signedData['payoutOption'];
-
-            if (JSON.stringify(iapSignedData) !== JSON.stringify(signedData)) {
-                 console.log('signed data are different. ' + JSON.stringify(iapSignedData, null, 2) + ' and ' + JSON.stringify(signedData, null, 2));
-            }
-            // Overwrite the two signed data
-            signedData = iapSignedData;
+            var payoutOption = developerPayload['payoutOption'];
 
             callback(null, context, productId, payoutOption);
         },
@@ -279,7 +280,7 @@ router.post('/confirm', function(req, res, next) {
          * @param {function(?Object, ...)} callback
          */
         function(order, callback) {
-            return Customer.load(order.getEmail(), function(err, customer) {
+            return Customer.load(context, order.getEmail(), function(err, customer) {
                 if (err) {
                     return callback(null, order);
                 }
@@ -288,13 +289,13 @@ router.post('/confirm', function(req, res, next) {
             });
         }
     ],
-        /**
-         * @param {?Object} err
-         * @param {Order=} order
-         * @param {Order=} customer
-         * @returns {*}
-         */
-        function(err, order, customer) {
+    /**
+     * @param {?Object} err
+     * @param {Order=} order
+     * @param {Order=} customer
+     * @returns {*}
+     */
+    function(err, order, customer) {
         if (err) {
             req.log.error({
                 err: err,
@@ -308,13 +309,22 @@ router.post('/confirm', function(req, res, next) {
         // the order is processing.
         res.send(JSON.stringify({
             'status': 0,
-            'message': ''
+            'message': '',
+            'orderId': order.getOrderId(),
+            'email': order.getEmail()
         }));
 
         // If this customer doesn't need to send money, mark it as complete and return immediately
         if (typeof customer !== 'undefined' && customer.getIsSendable() === false) {
             order.setIsProcessed(true);
-            order.save();
+            order.save(function(err) {
+                if (err) {
+                    req.log.error({
+                        error: err,
+                        order: order
+                    });
+                }
+            });
             return;
         }
 
@@ -328,7 +338,14 @@ router.post('/confirm', function(req, res, next) {
             if (err) {
                 order.setIsProcessed(true)
                     .setHasError(true)
-                    .save();
+                    .save(function(err) {
+                        if (err) {
+                            req.log.error({
+                                error: err,
+                                order: order
+                            });
+                        }
+                    });
                 return req.log.error({
                     error: err,
                     order: order
@@ -338,7 +355,14 @@ router.post('/confirm', function(req, res, next) {
             order
                 .setIsProcessed(true)
                 .setHasError(false)
-                .save();
+                .save(function(err) {
+                    if (err) {
+                        req.log.error({
+                            error: err,
+                            order: order
+                        });
+                    }
+                });
 
             req.log.info({
                 'payoutResult': result
@@ -355,6 +379,9 @@ router.post('/confirm', function(req, res, next) {
  * @private
  */
 var _buildQuote = function(context, productId, payoutOption, topCallback) {
+    assert(typeof productId !== 'undefined');
+    assert(typeof payoutOption !== 'undefined');
+    assert(typeof topCallback !== 'undefined');
     async.waterfall([
         function(callback) {
             async.parallel({

@@ -93,16 +93,20 @@ Order.prototype.save = function(callback) {
 
 /**
  * @param {boolean} isProcessed
+ * @return {Order}
  */
 Order.prototype.setIsProcessed = function(isProcessed) {
     this.isProcessed = isProcessed;
+    return this;
 };
 
 /**
  * @param {boolean} hasError
+ * @return {Order}
  */
 Order.prototype.setHasError = function(hasError) {
     this.hasError = hasError;
+    return this;
 };
 
 // Getters
