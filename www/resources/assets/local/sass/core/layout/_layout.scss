@@ -1,6 +1,8 @@
 .cr-content {
     max-width: 1000px;
     margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .cr-center-flex {
@@ -11,11 +13,6 @@
 .cr-content--no-padding {
     padding-left: 0;
     padding-right: 0;
-}
-
-.cr-layout--min-padding {
-    padding-left: 15px;
-    padding-right: 15px;
 }
 
 .cr-layout--light-bg {
