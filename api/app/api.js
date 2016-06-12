@@ -10,6 +10,7 @@ var Quote =  require('app/payout/quote/quote');
 var Customer = require('app/customer/customer');
 var Order = require('app/order/order');
 var OrderBuilder = require('app/order/builder');
+var OrderViewProcessor = require('app/order/view/processor');
 
 var PayoutProcessorHelper = require('app/payout/helper');
 
@@ -364,8 +365,21 @@ router.post('/confirm', function(req, res, next) {
                     }
                 });
 
-            req.log.info({
-                'payoutResult': result
+            var mailOptions = {
+                'from': 'Credit Refund <support@creditrefund.com.au>',
+                'to': order.getEmail(),
+                'subject': OrderViewProcessorr.getSubject(order),
+                'text': OrderViewProcessor.processTextNewOrderEmail(order)
+            };
+
+            context.mailer.sendMail(mailOptions, function(err, info) {
+                if (err) {
+                    return req.log.error(err);
+                }
+                req.log.info({
+                    'mailInfo': info,
+                    'payoutResult': result
+                });
             });
         });
     });
@@ -398,13 +412,7 @@ var _buildQuote = function(context, productId, payoutOption, topCallback) {
             var fees = results['fees'];
 
             var quoteBuilder = new QuoteBuilder(new QuoteValue(product.getValue(), QuoteValue.CENTS));
-            us.each(fees.getMandatoryFees(), function(feeData) {
-                var feeTitle = feeData['title'];
-                var percent = new BigNumber(feeData['percent']);
-                var flat = new QuoteValue(new BigNumber(feeData['flat']), QuoteValue.CENTS);
-
-                quoteBuilder.addFee(feeTitle, percent, flat);
-            });
+            quoteBuilder.addFees(fees.getMandatoryFees());
 
             var payoutFee = fees.getFeeByCode(payoutOption);
             var payoutFeePercent = new BigNumber(payoutFee['percent']);

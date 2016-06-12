@@ -62,6 +62,21 @@ QuoteBuilder.prototype.addFee = function(title, percentOutOfHundred, qFlatAmount
 };
 
 /**
+ * // todo: actually pass in a collection here and not just an object array
+ * @param {Object[]} feeCollection
+ */
+QuoteBuilder.prototype.addFees = function(feeCollection) {
+    var self = this;
+    us.each(feeCollection, function(feeData) {
+        var feeTitle = feeData['title'];
+        var percent = new BigNumber(feeData['percent']);
+        var flat = new QuoteValue(new BigNumber(feeData['flat']), QuoteValue.CENTS);
+
+        self.addFee(feeTitle, percent, flat);
+    });
+};
+
+/**
  * @throws {Error}
  * @return {Quote}
  */
@@ -95,8 +110,7 @@ function buildQuoteFromAbsolute(quoteFees, qTotalAmount) {
     us.each(quoteFees, function(quoteFee) {
         bRunningFeeTotal = bRunningFeeTotal.add(quoteFee.getValue(QuoteValue.CENTS));
         if (bRunningFeeTotal.greaterThanOrEqualTo(bTotalAmount)) {
-            throw new QuoteError('Running fee total ' + bRunningFeeTotal.toString() + ' is greater than total amount '
-                + bTotalAmount.toString());
+            throw new QuoteError('Looks like the fees are greater than the payout value. Please use a different payment method or increase the amount to convert');
         }
     });
 
