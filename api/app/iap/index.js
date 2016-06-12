@@ -14,11 +14,7 @@ function Iap(context) {
  * @param callback
  */
 Iap.prototype.processGoogleOrder = function(signedData, signature, callback) {
-	iap.config({
-		googlePublicKeyPath : this.context.platform.google.googlePublicKeyPath
-	});
-
-	iap.setup(function(err) {
+	this.context.iap.setup(function(err) {
 		if (err) {
 			return callback(err);
 		}
