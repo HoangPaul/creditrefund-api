@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Introducing Lollipop, a sweet new take on Android.">
+    <meta name="description" content="Credit Refund contacts">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Credit Refund - Contact Us</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link type="text/css" rel="stylesheet" href="assets/css/styles.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/styles.min.css">
 </head>
 <body>
 <div class="mdl-layout mdl-layout--fixed-header">
@@ -16,9 +16,7 @@
             <a class="cr-header__title cr-navigation__link mdl-layout-title mdl-navigation__link" href="index.html">
                 Credit Refund
             </a>
-            <!-- Add spacer, to align navigation to the right in desktop -->
             <div class="mdl-layout-spacer"></div>
-            <!-- Navigation -->
             <nav class="mdl-navigation">
                 <a class="cr-navigation__link mdl-navigation__link mdl-typography--text-uppercase" href="faq.html">FAQ</a>
                 <a class="cr-navigation__link mdl-navigation__link mdl-typography--text-uppercase" href="contact.html">Contact</a>
@@ -29,31 +27,29 @@
     <div class="mdl-layout__content cr-layout--light-bg">
         <a name="top"></a>
         <div class="cr-content">
-            <form action="#">
+            <form action="https://formspree.io/support@creditrefund.com.au" method="POST" data-submit-ajax>
+                <input type="text" name="_gotcha" style="position: absolute; right: 10000px;" />
                 <div class="mdl-grid">
                     <div class="mdl-cell--6-col mdl-cell--3-offset-desktop mdl-cell--8-col-tablet">
                         <h1>Contact Us</h1>
-                        <div class="cr-typography__text--large cr-typography__heading">
-                            Help and support
-                        </div>
                         <p class="cr-typography__text--small">
                             Have questions? Need help? Drop us a line and we'll get back to you as soon as we can.
                         </p>
 
                         <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="sample3">
-                            <label class="mdl-textfield__label" for="sample3">Name</label>
+                            <input class="mdl-textfield__input" type="text" name="name">
+                            <label class="mdl-textfield__label">Name</label>
                         </div>
                         <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" id="sample3">
-                            <label class="mdl-textfield__label" for="sample3">Email</label>
+                            <input class="mdl-textfield__input" type="text" name="_replyto">
+                            <label class="mdl-textfield__label">Email</label>
                         </div>
                         <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <textarea class="mdl-textfield__input" type="text" rows= "15" id="sample5" ></textarea>
                             <label class="mdl-textfield__label" for="sample5">Message</label>
                         </div>
 
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                        <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
                             Submit
                         </button>
                     </div>
@@ -78,6 +74,6 @@
         </div>
     </footer>
 </div>
-<script async defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+<script async defer src="assets/js/scripts.min.js"></script>
 </body>
 </html>

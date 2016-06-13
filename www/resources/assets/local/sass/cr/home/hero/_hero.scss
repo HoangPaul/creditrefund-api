@@ -23,14 +23,16 @@ $cr-hero-container-height: 70vh;
 
     > p {
         font-size: 24px;
+        font-weight: 100;
+        color: white;
     }
 }
 
 .cr-hero__text--bottom {
     bottom: 20%;
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 15px;
+    right: 15px;
 }
 
 .cr-hero__button {
