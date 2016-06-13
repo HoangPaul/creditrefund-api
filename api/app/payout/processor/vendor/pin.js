@@ -60,7 +60,7 @@ Pin.prototype.sendPayment = function(order, callback) {
         var payoutValue = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
 
         var transferObject = {
-            'description': order.getOrderId(), // todo: self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
+            'description': 'Credit Refund order ID: ' + order.getOrderId(), // todo: self.context.payoutMessages.REFERENCE_NUMBER_TEMPLATE(order.getOrderId()),
             'amount': payoutValue.getValue(QuoteValue.CENTS).toFixed(0),
             'currency': 'AUD',
             'recipient': data.token

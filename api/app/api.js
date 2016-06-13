@@ -368,7 +368,7 @@ router.post('/confirm', function(req, res, next) {
             var mailOptions = {
                 'from': 'Credit Refund <support@creditrefund.com.au>',
                 'to': order.getEmail(),
-                'subject': OrderViewProcessorr.getSubject(order),
+                'subject': OrderViewProcessor.getSubject(order),
                 'text': OrderViewProcessor.processTextNewOrderEmail(order)
             };
 

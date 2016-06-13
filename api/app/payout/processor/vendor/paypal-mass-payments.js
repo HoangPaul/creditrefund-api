@@ -54,7 +54,7 @@ Paypal.prototype.sendPayment = function(order, callback) {
         'L_EMAIL0': order.getEmail(),
         'L_AMT0': payoutValue.getValue(QuoteValue.DOLLARS).toFixed(2),
         'L_UNIQUEID0': order.getOrderId(),
-        'L_NOTE0': 'test paypal note'
+        'L_NOTE0': 'Credit Refund order ID: ' + order.getOrderId()
     };
 
     data = us.extend(data, recipients);
