@@ -99,7 +99,7 @@ QuoteBuilder.prototype.build = function() {
 /**
  * @param {Object} quoteFees
  * @param {QuoteValue} qTotalAmount
- * @throws {Error}
+ * @throws {QuoteError}
  * @returns {Quote}
  */
 function buildQuoteFromAbsolute(quoteFees, qTotalAmount) {

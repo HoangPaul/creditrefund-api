@@ -93,7 +93,7 @@ describe('QuoteBuilder', function() {
 
         quoteBuilder.addFee('Google Fee', new BigNumber(30), new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
 
-        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError, 'is greater than total amount');
+        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError);
     });
 
     it('should throw QuoteError if fee is equal to total', function() {
@@ -106,7 +106,7 @@ describe('QuoteBuilder', function() {
 
         quoteBuilder.addFee('Google Fee', new BigNumber(0), new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
 
-        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError, 'is greater than total amount');
+        assert.throws(quoteBuilder.build.bind(quoteBuilder), QuoteError);
     });
 
     it('should not throw any error if fee is 1 cent under total', function() {
