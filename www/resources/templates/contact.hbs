@@ -1,0 +1,35 @@
+{{> header title='Credit Refund - Contact Us' description='Credit Refund contacts'}}
+            <div class="mdl-layout__content cr-layout--light-bg">
+                <a name="top"></a>
+                <div class="cr-content">
+                    <form action="https://formspree.io/support@creditrefund.com.au" method="POST" data-submit-ajax>
+                        <input type="text" name="_gotcha" style="position: absolute; right: 10000px;" />
+                        <div class="mdl-grid">
+                            <div class="mdl-cell--6-col mdl-cell--3-offset-desktop mdl-cell--8-col-tablet">
+                                <h1>Contact Us</h1>
+                                <p class="cr-typography__text--small">
+                                    Have questions? Need help? Drop us a line and we'll get back to you as soon as we can.
+                                </p>
+
+                                <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                    <input class="mdl-textfield__input" type="text" name="name">
+                                    <label class="mdl-textfield__label">Name</label>
+                                </div>
+                                <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                    <input class="mdl-textfield__input" type="text" name="_replyto">
+                                    <label class="mdl-textfield__label">Email</label>
+                                </div>
+                                <div class="cr-layout--full-width mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                    <textarea class="mdl-textfield__input" type="text" rows= "15" id="sample5" ></textarea>
+                                    <label class="mdl-textfield__label" for="sample5">Message</label>
+                                </div>
+
+                                <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+{{> footer}}

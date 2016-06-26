@@ -9,3 +9,5 @@ api/app/test.js
 www/node_modules/
 www/resources/assets/vendor/
 www/public/assets/
+www/resources/tmp/
+www/public/

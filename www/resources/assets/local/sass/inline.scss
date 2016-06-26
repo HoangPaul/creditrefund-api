@@ -1,0 +1,43 @@
+@import "cr/vendor-variables";
+@import  "../../vendor/material-design-lite/src/variables";
+@import  "../../vendor/material-design-lite/src/mixins";
+
+html {
+  color: transparent;
+}
+
+a {
+  color: transparent;
+}
+
+button {
+  display: none;
+}
+
+body {
+  margin: 0;
+}
+
+hr {
+  display: none;
+}
+
+.mdl-layout__header {
+  height: 64px;
+  background-color: unquote("rgb(#{$color-primary})");
+}
+
+.cr-hero {
+  background-image: linear-gradient(-410deg, #455A64 20%, #607D8B 95%);
+
+  min-height: calc(750px - #{$layout-mobile-header-height});
+  padding: 60px 0;
+
+  @media (min-width: $grid-desktop-breakpoint) {
+    min-height: calc(750px - #{$layout-desktop-header-height});
+  }
+
+  & + div {
+    display: none;
+  }
+}

@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "material-design-lite": "^1.1.3"
+    "material-design-lite": "^1.1.3",
+    "loadcss": "^1.2.0"
   }
 }

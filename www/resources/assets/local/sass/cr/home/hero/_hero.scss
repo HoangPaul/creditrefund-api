@@ -1,9 +1,8 @@
-$cr-hero-container-height: 70vh;
+$cr-hero-container-height: 750px;
 
 .cr-hero {
     position: relative;
-    //background-color: #666666;
-    background-image: -webkit-linear-gradient(-410deg, #455A64 20%, #607D8B 95%);
+    background-image: linear-gradient(-410deg, #455A64 20%, #607D8B 95%);
 
     min-height: calc(#{$cr-hero-container-height} - #{$layout-mobile-header-height});
     padding-top: 60px;

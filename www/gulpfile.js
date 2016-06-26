@@ -1,22 +1,72 @@
+var fs = require('fs');
+
 var gulp = require('gulp');
 var sass = require('gulp-sass');
 var rename = require('gulp-rename');
 var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+var handlebars = require('gulp-compile-handlebars');
+var rev = require('gulp-rev');
 
-gulp.task('styles', function() {
-    mkdirp('public/assets/css/');
+gulp.task('default', ['templates']);
 
-    gulp.src('resources/assets/local/sass/styles.scss')
-        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-        .pipe(rename('styles.min.css'))
-        .pipe(gulp.dest('public/assets/css/'));
+gulp.task('compile', ['default']);
+
+gulp.task('templates', ['styles', 'scripts', '_inlineCss', '_loadCss'], function() {
+    var inlineStyles = fs.readFileSync('resources/tmp/inlineStyles.min.css', {'encoding': 'utf8'});
+    var loadCss = fs.readFileSync('resources/tmp/loadCss.min.js', {'encoding': 'utf8'});
+    var revManifest = JSON.parse(fs.readFileSync('resources/tmp/rev-manifest.json', {'encoding': 'utf8'}));
+
+    return gulp.src('resources/templates/*.hbs')
+        .pipe(handlebars({
+            'styles': revManifest['styles.min.css'],
+            'scripts': revManifest['scripts.min.js'],
+            'inlineStyles': inlineStyles,
+            'loadCss': loadCss
+        }, {
+            'batch': ['resources/templates/partials']
+        }))
+        .pipe(rename({'extname': '.html'}))
+        .pipe(gulp.dest('public/'));
 });
 
-gulp.task('scripts', function() {
+gulp.task('_loadCss', function() {
+    return gulp.src([
+        'resources/assets/vendor/loadcss/src/loadCSS.js',
+        'resources/assets/vendor/loadcss/src/cssrelpreload.js'
+    ])
+        .pipe(concat('all.css'))
+        .pipe(uglify())
+        .pipe(rename('loadCss.min.js'))
+        .pipe(gulp.dest('resources/tmp/'));
+});
+
+gulp.task('_inlineCss', function() {
+    return gulp.src('resources/assets/local/sass/inline.scss')
+        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+        .pipe(rename('inlineStyles.min.css'))
+        .pipe(gulp.dest('resources/tmp/'));
+});
+
+gulp.task('_initDir', function() {
+    mkdirp('public/assets/css/');
     mkdirp('public/assets/js/');
-    gulp.src([
+    mkdirp('resources/tmp');
+});
+
+gulp.task('styles', ['_initDir'], function() {
+    return gulp.src('resources/assets/local/sass/styles.scss')
+        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+        .pipe(rename('styles.min.css'))
+        .pipe(rev())
+        .pipe(gulp.dest('public/assets/css/'))
+        .pipe(rev.manifest('resources/tmp/rev-manifest.json', {base: process.cwd()+'/resources/tmp', 'merge': true}))
+        .pipe(gulp.dest('resources/tmp/'));
+});
+
+gulp.task('scripts', ['_initDir'], function() {
+    return gulp.src([
         // Component handler
         'resources/assets/vendor/material-design-lite/src/mdlComponentHandler.js',
         // Polyfills/dependencies
@@ -47,5 +97,8 @@ gulp.task('scripts', function() {
             sourceRoot: '.',
             sourceMapIncludeSources: true
         }))
-        .pipe(gulp.dest('public/assets/js/'));
+        .pipe(rev())
+        .pipe(gulp.dest('public/assets/js/'))
+        .pipe(rev.manifest('resources/tmp/rev-manifest.json', {base: process.cwd()+'/resources/tmp', 'merge': true}))
+        .pipe(gulp.dest('resources/tmp/'));
 });
