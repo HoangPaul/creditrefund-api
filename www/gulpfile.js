@@ -6,6 +6,7 @@ var rename = require('gulp-rename');
 var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+var gulpSequence = require('gulp-sequence');
 var handlebars = require('gulp-compile-handlebars');
 var rev = require('gulp-rev');
 
@@ -13,7 +14,7 @@ gulp.task('default', ['templates']);
 
 gulp.task('compile', ['default']);
 
-gulp.task('templates', ['styles', 'scripts', '_inlineCss', '_loadCss'], function() {
+gulp.task('templates', ['_prepareResourcesForTemplates'], function() {
     var inlineStyles = fs.readFileSync('resources/tmp/inlineStyles.min.css', {'encoding': 'utf8'});
     var loadCss = fs.readFileSync('resources/tmp/loadCss.min.js', {'encoding': 'utf8'});
     var revManifest = JSON.parse(fs.readFileSync('resources/tmp/rev-manifest.json', {'encoding': 'utf8'}));
@@ -31,6 +32,8 @@ gulp.task('templates', ['styles', 'scripts', '_inlineCss', '_loadCss'], function
         .pipe(rename({'extname': '.html'}))
         .pipe(gulp.dest('public/'));
 });
+
+gulp.task('_prepareResourcesForTemplates', gulpSequence('styles', 'scripts', ['_inlineCss', '_loadCss']));
 
 gulp.task('_loadCss', function() {
     return gulp.src([
@@ -54,6 +57,8 @@ gulp.task('_initDir', function() {
     mkdirp('public/assets/css/');
     mkdirp('public/assets/js/');
     mkdirp('resources/tmp');
+
+    return gulp.src('resources/assets/local/sass/styles.scss');
 });
 
 gulp.task('styles', ['_initDir'], function() {
@@ -80,8 +85,8 @@ gulp.task('scripts', ['_initDir'], function() {
         //'resources/assets/vendor/material-design-lite/src/progress/progress.js',
         //'resources/assets/vendor/material-design-lite/src/radio/radio.js',
         //'resources/assets/vendor/material-design-lite/src/slider/slider.js',
-        //'resources/assets/vendor/material-design-lite/src/snackbar/snackbar.js',
-        //'resources/assets/vendor/material-design-lite/src/spinner/spinner.js',
+        'resources/assets/vendor/material-design-lite/src/snackbar/snackbar.js',
+        'resources/assets/vendor/material-design-lite/src/spinner/spinner.js',
         //'resources/assets/vendor/material-design-lite/src/switch/switch.js',
         //'resources/assets/vendor/material-design-lite/src/tabs/tabs.js',
         'resources/assets/vendor/material-design-lite/src/textfield/textfield.js',

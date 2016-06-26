@@ -11,9 +11,28 @@
             var data = new FormData(form);
 
             var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function(httpRequest) {
+                if (httpRequest.readyState === XMLHttpRequest.DONE) {
+                    document.querySelector('[data-submit-ajax-btn]').style.display = 'block';
+                    document.querySelector('[data-submit-ajax-load-indicator]').style.display = 'none';
+
+                    var message = '';
+                    if (httpRequest.status === 200) {
+                        message = 'Your message has been sent';
+                    } else {
+                        message = 'Unable to send message';
+                    }
+
+                    document.querySelector('#global-snackbar').MaterialSnackbar.showSnackbar({
+                        'message': message
+                    });
+                }
+            };
             xhr.open(httpMethod, action);
             xhr.setRequestHeader('Accept', 'application/json');
             xhr.send(data);
+            document.querySelector('[data-submit-ajax-btn]').style.display = 'none';
+            document.querySelector('[data-submit-ajax-load-indicator]').style.display = 'block';
             return false;
         });
     }
