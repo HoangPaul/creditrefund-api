@@ -23,7 +23,8 @@ gulp.task('templates', ['styles', 'scripts', '_inlineCss', '_loadCss'], function
             'styles': revManifest['styles.min.css'],
             'scripts': revManifest['scripts.min.js'],
             'inlineStyles': inlineStyles,
-            'loadCss': loadCss
+            'loadCss': loadCss,
+            'baseUrl': 'https://creditrefund.com.au'
         }, {
             'batch': ['resources/templates/partials']
         }))
