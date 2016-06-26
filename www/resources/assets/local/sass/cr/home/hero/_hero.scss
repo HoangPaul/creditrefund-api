@@ -1,18 +1,3 @@
-$cr-hero-container-height: 750px;
-
-.cr-hero {
-    position: relative;
-    background-image: linear-gradient(-410deg, #455A64 20%, #607D8B 95%);
-
-    min-height: calc(#{$cr-hero-container-height} - #{$layout-mobile-header-height});
-    padding-top: 60px;
-    padding-bottom: 60px;
-
-    @media (min-width: $grid-desktop-breakpoint) {
-        min-height: calc(#{$cr-hero-container-height} - #{$layout-desktop-header-height});
-    }
-}
-
 .cr-hero__text {
     position: relative;
     z-index: 10;

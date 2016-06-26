@@ -4,9 +4,6 @@
 }
 
 .cr-fee__breakdown {
-    padding-left: 15px;
-    padding-right: 15px;
-
     @media (min-width: $grid-tablet-breakpoint) and (max-width: $grid-desktop-breakpoint - 1) {
         padding-left: 20%;
         padding-right: 20%;
