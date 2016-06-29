@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+var Blacklist = require('app/blacklist');
 var PayoutProcessorFactory = require('app/payout/processor/factory');
 var Product = require('app/product/product');
 var FeeCollection = require('app/payout/fee/collection');
@@ -55,6 +56,7 @@ router.use(function(req, res, next) {
  *      "productId": string
  *      "email": string
  *      "payoutOption": ("paypal"|"pin")
+ *      "deviceId": string
  *      "accountHolderName": string
  *      "bsb": string
  *      "accountNumber": string
@@ -83,7 +85,8 @@ router.post('/verify', function(req, res, next) {
             var requiredFields = [
                 'productId',
                 'email',
-                'payoutOption'
+                'payoutOption',
+                'deviceId'
             ];
 
             var payoutProcessorHelper = new PayoutProcessorHelper(context);
@@ -122,9 +125,39 @@ router.post('/verify', function(req, res, next) {
             } catch (err) {
                 return callback(err);
             }
+            callback(null);
+        },
+        // Check if blacklisted
+        function(callback) {
+            var payoutProcessorClass = PayoutProcessorFactory.getPaymentProcessorClass(data['payoutOption']);
+            var payoutProcessorHelper = new PayoutProcessorHelper(context);
+            var payoutProcessor = new payoutProcessorClass(context, payoutProcessorHelper);
 
-            var productId = data['productId'];
-            return callback(null, context, productId, payoutOption);
+            var deviceIid = data['deviceId'].split('--')[1];
+            var blacklistDataToCheck = [
+                data['email'],
+                deviceIid,
+                payoutProcessor.getDataHash(data)
+            ];
+
+            var deviceMacAddress = data['deviceId'].split('--')[0];
+            if (deviceMacAddress !== 'null') {
+                blacklistDataToCheck.push(deviceMacAddress);
+            }
+
+            var blacklist = new Blacklist(context);
+            return blacklist.hasBlacklistedData(blacklistDataToCheck, function(err, isInBlacklist) {
+                if (err) {
+                    req.log.info({err: err});
+                    return callback(new VisibleError(apiMessages.BLACKLIST_ERROR_TEMPLATE(), apiMessages.BLACKLIST_ERROR_CODE));
+                }
+
+                if (isInBlacklist) {
+                    req.log.info({err: 'Is in blacklist but no error was outputted'});
+                    return callback(new VisibleError(apiMessages.BLACKLIST_ERROR_TEMPLATE(), apiMessages.BLACKLIST_ERROR_CODE));
+                }
+                return callback(null, context, data['productId'], data['payoutOption']);
+            });
         },
 
         // Build quote
@@ -136,7 +169,6 @@ router.post('/verify', function(req, res, next) {
          */
         function(err, quote) {
             if (err) {
-                req.log.error({err: err, req: req});
                 return next(err);
             }
 
@@ -436,7 +468,7 @@ router.use(function(req, res, next) {
 });
 
 router.use(function(err, req, res, next) {
-    req.log.warn(err);
+    req.log.error({err: err, req: req});
     next(err);
 });
 

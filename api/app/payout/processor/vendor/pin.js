@@ -1,7 +1,9 @@
 var Quote = require('app/payout/quote/quote');
 var QuoteValue = require('app/payout/quote/value');
+var us = require('underscore');
 
 var PAYOUT_OPTION = 'pin';
+var REQUIRED_PARAMS = ['accountHolderName', 'bsb', 'accountNumber'];
 
 /**
  * @param {{dbDriver: object}} context
@@ -30,7 +32,7 @@ Pin.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Pin.prototype.isValidData = function(data) {
-    return this.helper.hasRequiredData(data, ['accountHolderName', 'bsb', 'accountNumber']);
+    return this.helper.hasRequiredData(data, REQUIRED_PARAMS);
 };
 
 /**
@@ -68,6 +70,14 @@ Pin.prototype.sendPayment = function(order, callback) {
 
         self.context.processor.pin.createTransfer(transferObject, callback);
     });
+};
+
+/**
+ * @param {Object} data
+ */
+Pin.prototype.getDataHash = function(data) {
+    var requiredData = us.pick(data, REQUIRED_PARAMS);
+    return JSON.stringify(requiredData);
 };
 
 module.exports = Pin;

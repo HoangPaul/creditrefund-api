@@ -1,7 +1,9 @@
 var QuoteValue = require('app/payout/quote/value');
 var Quote = require('app/payout/quote/quote');
+var us = require('underscore');
 
 var PAYOUT_OPTION = 'paypal';
+var REQUIRED_PARAMS = ['email'];
 
 /**
  * @param {{dbDriver: object, processor: object}} context
@@ -33,7 +35,7 @@ Paypal.prototype.isEnabled = function(callback) {
  * @return {ValidationResult}
  */
 Paypal.prototype.isValidData = function(data) {
-    return this.helper.hasRequiredData(data, ['email']);
+    return this.helper.hasRequiredData(data, REQUIRED_PARAMS);
 };
 
 /**
@@ -45,7 +47,6 @@ Paypal.prototype.sendPayment = function(order, callback) {
     var quote = order.getQuote();
     var payoutValue = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE);
 
-    var self = this;
     var payoutObject = {
         'sender_batch_header': {
             'sender_batch_id': order.getOrderId(),
@@ -64,6 +65,14 @@ Paypal.prototype.sendPayment = function(order, callback) {
     };
 
     this.context.processor.paypal.payout.create(payoutObject, syncMode, callback);
+};
+
+/**
+ * @param {Object} data
+ */
+Paypal.prototype.getDataHash = function(data) {
+    var requiredData = us.pick(data, REQUIRED_PARAMS);
+    return JSON.stringify(requiredData);
 };
 
 module.exports = Paypal;
