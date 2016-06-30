@@ -1,6 +1,6 @@
 var ValidationResult = require('app/validation/result');
 
-var TABLE_NAME = 'payout_options';
+var TABLE_NAME = 'payoutOptions';
 
 function PayoutHelper(context) {
     this.context = context;
@@ -14,7 +14,7 @@ PayoutHelper.prototype.isEnabled = function(payoutOption, callback) {
     var params = {
         TableName: TABLE_NAME,
         Key: {
-            "payout_option": payoutOption
+            "payoutOption": payoutOption
         }
     };
 
@@ -27,7 +27,7 @@ PayoutHelper.prototype.isEnabled = function(payoutOption, callback) {
             return callback(new Error('Failed to retrieve payout option "' + payoutOption + '"'));
         }
 
-        return callback(null, dbData.Item.is_enabled);
+        return callback(null, dbData.Item.isEnabled);
     });
 };
 

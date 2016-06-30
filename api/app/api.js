@@ -127,6 +127,24 @@ router.post('/verify', function(req, res, next) {
             }
             callback(null);
         },
+        function(callback) {
+            var payoutProcessorClass = PayoutProcessorFactory.getPaymentProcessorClass(data['payoutOption']);
+            var payoutProcessorHelper = new PayoutProcessorHelper(context);
+            var payoutProcessor = new payoutProcessorClass(context, payoutProcessorHelper);
+
+            payoutProcessor.isEnabled(function(err, isEnabled) {
+                if (err) {
+                    return callback(err);
+                }
+                if (!isEnabled) {
+                    return callback(new VisibleError(
+                        'Sorry, this payout option is not available. Please choose a different option',
+                        apiMessages.PAYOUT_METHOD_NOT_AVAILABLE
+                    ));
+                }
+                return callback();
+            });
+        },
         // Check if blacklisted
         function(callback) {
             var payoutProcessorClass = PayoutProcessorFactory.getPaymentProcessorClass(data['payoutOption']);
