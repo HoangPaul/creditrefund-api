@@ -9,21 +9,22 @@ app.disable('x-powered-by');
 app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
-    res.send('Hello World!');
+    res.send(JSON.stringify({
+        'latest': 'v1'
+    }));
 });
 
-app.use('/api', function(req, res, next) {
+// API
+app.use('/v1', function(req, res, next) {
     req.context = context;
-
     next();
 });
-
-app.use('/api', api);
+app.use('/v1', api);
 
 var server = app.listen(3000, function () {
     var host = server.address().address;
     var port = server.address().port;
 
-    console.log('Example app listening at http://%s:%s', host, port);
+    console.log('Credit Refund API started on http://%s:%s', host, port);
 });
 
