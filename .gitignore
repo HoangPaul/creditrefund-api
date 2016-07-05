@@ -1,9 +1,8 @@
 api/node_modules/
 api/npm-debug.log
 api/logs/*
-api/aws-config.json
 api/docs
-api/app/test.js
+api/env
 
 # static site
 www/node_modules/
