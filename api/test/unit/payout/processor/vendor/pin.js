@@ -1,3 +1,5 @@
+return;
+
 var assert = require('chai').assert;
 var us = require('underscore');
 var deepcopy = require('deepcopy');
@@ -11,15 +13,15 @@ var Quote = require('app/payout/quote/quote');
 var QuoteBuilder = require('app/payout/quote/builder');
 var QuoteValue = require('app/payout/quote/value');
 
-var testContext = require('../../../../testContext');
-var testSecretData = require('../../../../testSecretData');
+var context = require('../../../../context');
+var data = require('../../../../data');
 var testExistingOrderId = 'test' + Date.now();
 
 describe('Payout Processor Pin Payments', function() {
     var data = {
-        'accountHolderName': testSecretData.accountHolderName,
-        'bsb': testSecretData.bsb,
-        'accountNumber': testSecretData.accountNumber
+        'accountHolderName': data.accountHolderName,
+        'bsb': data.bsb,
+        'accountNumber': data.accountNumber
     };
 
     it('should have processor title', function() {
@@ -28,24 +30,24 @@ describe('Payout Processor Pin Payments', function() {
 
     describe('Validation', function() {
         it('should validate account holder, bsb and account number', function() {
-            var helper = new PayoutHelper(testContext);
-            var pin = new Pin(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var pin = new Pin(context, helper);
 
             var validationResult = pin.isValidData(data);
             assert.isFalse(validationResult.hasErrors());
         });
 
         it('should validate account holder, bsb and account number, even with extra data', function() {
-            var helper = new PayoutHelper(testContext);
-            var pin = new Pin(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var pin = new Pin(context, helper);
 
             var validationResult = pin.isValidData(data);
             assert.isFalse(validationResult.hasErrors());
         });
 
         it('should throw error if any of account holder, bsb and account number is missing', function() {
-            var helper = new PayoutHelper(testContext);
-            var pin = new Pin(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var pin = new Pin(context, helper);
 
             us.each(data, function(_, key) {
                 var clonedData = deepcopy(data);
@@ -61,14 +63,14 @@ describe('Payout Processor Pin Payments', function() {
         it('should send payment from order successfully', function(done) {
             this.timeout(10000);
 
-            var helper = new PayoutHelper(testContext);
-            var pin = new Pin(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var pin = new Pin(context, helper);
 
             var quoteBuilder = new QuoteBuilder(new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
             quoteBuilder.addFee('Test fee', new BigNumber(30), new QuoteValue(new BigNumber(0), QuoteValue.CENTS));
             var quote = quoteBuilder.build();
 
-            var orderBuilder = new OrderBuilder(testContext);
+            var orderBuilder = new OrderBuilder(context);
 
             orderBuilder.setOrderId(testExistingOrderId);
             orderBuilder.setEmail('testPinPayment@example.com');

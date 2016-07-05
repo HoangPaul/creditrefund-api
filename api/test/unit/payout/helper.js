@@ -1,17 +1,28 @@
 var assert = require('chai').assert;
 
-var testContext = require('../../testContext');
+var context = require('../../context');
+var data = require('../../data');
 
 describe('Payout Helper', function() {
     this.timeout(0);
+
+    var enabledPayoutOption = data.enabledPayoutOptionId;
+    var disabledPayoutOption = data.disabledPayoutOptionId;
+
+    before(function(done) {
+        data.addPayoutOptions(done, context);
+    });
+    after(function(done) {
+        data.removePayoutOptions(done, context);
+    });
+
     describe('payout helper isEnabled', function() {
         it('should load payout and return true for enabled payout', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
 
-            payoutHelper.isEnabled(testPayoutOption, function(err, isEnabled) {
+            payoutHelper.isEnabled(enabledPayoutOption, function(err, isEnabled) {
                 if (err) {
                     throw err;
                 }
@@ -21,13 +32,12 @@ describe('Payout Helper', function() {
             });
         });
 
-        it('should load payout and return false for enabled payout', function(done) {
+        it('should load payout and return false for disabled payout', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_disabled';
+            var payoutHelper = new PayoutGenericHelper(context);
 
-            payoutHelper.isEnabled(testPayoutOption, function (err, isEnabled) {
+            payoutHelper.isEnabled(disabledPayoutOption, function (err, isEnabled) {
                 if (err) {
                     throw err;
                 }
@@ -40,10 +50,9 @@ describe('Payout Helper', function() {
         it('should return error if payout does not exist', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'non-existent-payout-option';
+            var payoutHelper = new PayoutGenericHelper(context);
 
-            payoutHelper.isEnabled(testPayoutOption, function(err, isEnabled) {
+            payoutHelper.isEnabled('non-existent-payout-option', function(err, isEnabled) {
                 assert.isNotNull(err);
                 done();
             });
@@ -54,8 +63,7 @@ describe('Payout Helper', function() {
         it('should return successfully on exact same data as required', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
             var data = {
                 'a': 'asdasd',
                 'b': 'qweqweq',
@@ -74,8 +82,7 @@ describe('Payout Helper', function() {
         it('should return successfully on more data than required', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
             var data = {
                 'a': 'asdasd',
                 'b': 'qweqweq',
@@ -95,8 +102,7 @@ describe('Payout Helper', function() {
         it('should return errors on data not present in required', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
             var data = {
                 'a': 'asdasd',
                 'b': 'qweqweq'
@@ -114,8 +120,7 @@ describe('Payout Helper', function() {
         it('should return errors on empty data and some required', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
             var data = {};
             var required = ['a', 'b', 'c'];
 
@@ -130,8 +135,7 @@ describe('Payout Helper', function() {
         it('should return successfully on some data and empty required', function(done) {
             var PayoutGenericHelper = require('app/payout/helper');
 
-            var payoutHelper = new PayoutGenericHelper(testContext);
-            var testPayoutOption = 'paypal_test_enabled';
+            var payoutHelper = new PayoutGenericHelper(context);
             var data = {
                 'a': 'asdasd',
                 'b': 'qweqweq'

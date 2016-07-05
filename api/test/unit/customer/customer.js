@@ -1,12 +1,12 @@
 var assert = require('chai').assert;
 
-var testContext = require('../../testContext');
+var context = require('../../context');
 
 describe('Customer', function() {
     it('should load customer if exists in database', function(done) {
         var Customer = require('app/customer/customer');
 
-        Customer.load(testContext, 'asd@asd.com', function(err, customer) {
+        Customer.load(context, 'asd@asd.com', function(err, customer) {
             if (err) {
                 throw err;
             }
@@ -19,7 +19,7 @@ describe('Customer', function() {
     it('should load non-sendable customer', function(done) {
         var Customer = require('app/customer/customer');
 
-        Customer.load(testContext, 'asd@asd.com', function(err, customer) {
+        Customer.load(context, 'asd@asd.com', function(err, customer) {
             if (err) {
                 throw err;
             }
@@ -33,7 +33,7 @@ describe('Customer', function() {
     it('should load sendable customer', function(done) {
         var Customer = require('app/customer/customer');
 
-        Customer.load(testContext, 'qwe@qwe.com', function(err, customer) {
+        Customer.load(context, 'qwe@qwe.com', function(err, customer) {
             if (err) {
                 throw err;
             }

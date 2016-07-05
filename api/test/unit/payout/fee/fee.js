@@ -1,13 +1,13 @@
 var assert = require('chai').assert;
 var us = require('underscore');
 
-var testContext = require('../../../testContext');
+var context = require('../../../context');
 
 describe('Fee', function() {
     it('should load fees from database', function(done) {
         var PayoutFeeCollection = require('app/payout/fee/collection');
 
-        PayoutFeeCollection.load(testContext, function(err, fees) {
+        PayoutFeeCollection.load(context, function(err, fees) {
             if (err) {
                 throw err;
             }
@@ -21,7 +21,7 @@ describe('Fee', function() {
     it('should get mandatory fees from collection', function(done) {
         var PayoutFeeCollection = require('app/payout/fee/collection');
 
-        PayoutFeeCollection.load(testContext, function(err, fees) {
+        PayoutFeeCollection.load(context, function(err, fees) {
             if (err) {
                 throw err;
             }
@@ -46,7 +46,7 @@ describe('Fee', function() {
     it('should get named fee from collection', function(done) {
         var PayoutFeeCollection = require('app/payout/fee/collection');
 
-        PayoutFeeCollection.load(testContext, function(err, fees) {
+        PayoutFeeCollection.load(context, function(err, fees) {
             if (err) {
                 throw err;
             }

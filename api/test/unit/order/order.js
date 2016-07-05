@@ -1,13 +1,13 @@
 var assert = require('chai').assert;
 var deepcopy = require('deepcopy');
 
-var testContext = require('../../testContext');
-var testSecretData = require('../../testSecretData');
+var context = require('../../context');
+var data = require('../../data');
 
-var newOrderId = testSecretData.newOrderId;
-var newOrderData = testSecretData.newOrderData;
-var existingOrderId = testSecretData.existingOrderId;
-var existingOrderData = testSecretData.existingOrderData;
+var newOrderId = data.newOrderId;
+var newOrderData = data.newOrderData;
+var existingOrderId = data.existingOrderId;
+var existingOrderData = data.existingOrderData;
 
 describe('Order', function() {
     describe('OrderBuilder', function() {
@@ -23,7 +23,7 @@ describe('Order', function() {
                 var incompleteData = deepcopy(newOrderData);
                 delete incompleteData[keyToRemove];
 
-                var orderBuilder = new OrderBuilder(testContext);
+                var orderBuilder = new OrderBuilder(context);
                 for (var key in incompleteData) {
                     if (!incompleteData.hasOwnProperty(key)) {
                         continue;
@@ -68,7 +68,7 @@ describe('Order', function() {
         it('should build successfully with full data through individual setters', function(done) {
             var Order = require('app/order/order');
             var OrderBuilder = require('app/order/builder');
-            var orderBuilder = new OrderBuilder(testContext);
+            var orderBuilder = new OrderBuilder(context);
 
             for (var key in newOrderData) {
                 if (newOrderData.hasOwnProperty(key)) {
@@ -115,7 +115,7 @@ describe('Order', function() {
         it('should build successfully with full data through full setter', function(done) {
             var Order = require('app/order/order');
             var OrderBuilder = require('app/order/builder');
-            var orderBuilder = new OrderBuilder(testContext);
+            var orderBuilder = new OrderBuilder(context);
 
             orderBuilder.setData(newOrderData);
 
@@ -131,18 +131,18 @@ describe('Order', function() {
     describe('Order', function () {
         // Set up all existing orders in database
         beforeEach(function(done) {
-            testSecretData.insertExistingOrder(done, testContext);
+            data.insertExistingOrder(done, context);
         });
 
         // Clean up all new orders in database
         afterEach(function(done) {
-            testSecretData.deleteNewOrder(done, testContext);
+            data.deleteNewOrder(done, context);
         });
 
         it('should load order if exists in database', function (done) {
             var Order = require('app/order/order');
 
-            Order.load(testContext, existingOrderId, function (err, order) {
+            Order.load(context, existingOrderId, function (err, order) {
                 if (err) {
                     throw err;
                 }
@@ -157,7 +157,7 @@ describe('Order', function() {
             var Quote = require('app/payout/quote/quote');
             var QuoteValue = require('app/payout/quote/value');
 
-            Order.load(testContext, existingOrderId, function (err, order) {
+            Order.load(context, existingOrderId, function (err, order) {
                 if (err) {
                     throw err;
                 }
@@ -174,7 +174,7 @@ describe('Order', function() {
         it('should create new order through builder and save successfully', function(done) {
             var Order = require('app/order/order');
             var OrderBuilder = require('app/order/builder');
-            var orderBuilder = new OrderBuilder(testContext);
+            var orderBuilder = new OrderBuilder(context);
 
             orderBuilder.setData(newOrderData);
 
@@ -185,7 +185,7 @@ describe('Order', function() {
                     throw err;
                 }
 
-                Order.load(testContext, newOrderId, function (err, order) {
+                Order.load(context, newOrderId, function (err, order) {
                     if (err) {
                         throw err;
                     }

@@ -11,8 +11,8 @@ var Quote = require('app/payout/quote/quote');
 var QuoteBuilder = require('app/payout/quote/builder');
 var QuoteValue = require('app/payout/quote/value');
 
-var testContext = require('../../../../testContext');
-var testSecretData = require('../../../../testSecretData');
+var context = require('../../../../context');
+var data = require('../../../../data');
 var testExistingOrderId = 'test' + Date.now();
 
 describe('Payout Processor Paypal Payments', function() {
@@ -26,24 +26,24 @@ describe('Payout Processor Paypal Payments', function() {
 
     describe('Validation', function() {
         it('should validate email', function() {
-            var helper = new PayoutHelper(testContext);
-            var paypal = new Paypal(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var paypal = new Paypal(context, helper);
 
             var validationResult = paypal.isValidData(data);
             assert.isFalse(validationResult.hasErrors());
         });
 
         it('should validate email, even with extra data', function() {
-            var helper = new PayoutHelper(testContext);
-            var paypal = new Paypal(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var paypal = new Paypal(context, helper);
 
             var validationResult = paypal.isValidData(data);
             assert.isFalse(validationResult.hasErrors());
         });
 
         it('should throw error if email is missing', function() {
-            var helper = new PayoutHelper(testContext);
-            var paypal = new Paypal(testContext, helper);
+            var helper = new PayoutHelper(context);
+            var paypal = new Paypal(context, helper);
 
             us.each(data, function(_, key) {
                 var clonedData = deepcopy(data);
@@ -60,16 +60,16 @@ describe('Payout Processor Paypal Payments', function() {
             this.timeout(100000);
 
             var PayoutProcessorFactory = require('app/payout/processor/factory');
-            var helper = new PayoutHelper(testContext);
+            var helper = new PayoutHelper(context);
             var paypalClass = PayoutProcessorFactory.getPaymentProcessorClass('paypal');
-            var paypal = new paypalClass(testContext, helper);
-            //var paypal = new Paypal(testContext, helper);
+            var paypal = new paypalClass(context, helper);
+            //var paypal = new Paypal(context, helper);
 
             var quoteBuilder = new QuoteBuilder(new QuoteValue(new BigNumber(100), QuoteValue.CENTS));
             quoteBuilder.addFee('Test fee', new BigNumber(0), new QuoteValue(new BigNumber(0), QuoteValue.CENTS));
             var quote = quoteBuilder.build();
 
-            var orderBuilder = new OrderBuilder(testContext);
+            var orderBuilder = new OrderBuilder(context);
 
             orderBuilder.setOrderId(testExistingOrderId);
             orderBuilder.setEmail('testpaypalpayout@example.com');
