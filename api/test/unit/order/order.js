@@ -129,14 +129,16 @@ describe('Order', function() {
     });
 
     describe('Order', function () {
-        // Set up all existing orders in database
         beforeEach(function(done) {
             data.insertExistingOrder(done, context);
         });
 
-        // Clean up all new orders in database
         afterEach(function(done) {
             data.deleteNewOrder(done, context);
+        });
+
+        after(function(done) {
+            data.insertExistingOrder(done, context);
         });
 
         it('should load order if exists in database', function (done) {

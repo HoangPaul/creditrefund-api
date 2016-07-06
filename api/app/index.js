@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var api = require('app/api');
-var context = require('app/context');
+var context = require('app/neuteredContext');
 
 app.disable('x-powered-by');
 

@@ -416,10 +416,11 @@ router.post('/confirm', function(req, res, next) {
                 });
 
             var mailOptions = {
-                'from': 'Credit Refund <support@creditrefund.com.au>',
+                'from': '<support@creditrefund.com.au>',
                 'to': order.getEmail(),
                 'subject': OrderViewProcessor.getSubject(order),
-                'text': OrderViewProcessor.processTextNewOrderEmail(order)
+                'text': OrderViewProcessor.processTextNewOrderEmail(order),
+                'xMailer': false
             };
 
             context.mailer.sendMail(mailOptions, function(err, info) {

@@ -61,6 +61,14 @@ module.exports.insertExistingOrder = function(done, context) {
         'Item': existingOrderData
     }, done);
 };
+module.exports.deleteExistingOrder = function(done, context) {
+    context.dbDriver.delete({
+        'TableName': 'orders',
+        'Key': {
+            'orderId': existingOrderId
+        }
+    }, done);
+};
 module.exports.deleteNewOrder = function(done, context) {
     context.dbDriver.delete({
         'TableName': 'orders',

@@ -2,13 +2,12 @@ var isProduction = process.env.CR_IS_PRODUCTION === "true";
 
 // Load DB
 var AWS = require("aws-sdk");
-AWS.config.update({
+var dynamoDb = new AWS.DynamoDB.DocumentClient({
     'accessKeyId': process.env.DYNAMODB_ACCESS_KEY_ID,
     'secretAccessKey': process.env.DYNAMODB_SECRET_ACCESS_KEY,
     'region': process.env.DYNAMODB_REGION,
     'endpoint': process.env.DYNAMODB_ENDPOINT
 });
-var dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 // Load in-app-purchase processor
 var iap = require('in-app-purchase');
