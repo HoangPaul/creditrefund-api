@@ -48,5 +48,10 @@ module.exports = {
     'processor': {
         'pin': pin,
         'paypalMassPayments': paypalMassPayments
+    },
+    'meta': {
+        'version': 'v1',
+        'isProduction': isProduction ? 'true' : 'false',
+        'isNeutered': false
     }
 };

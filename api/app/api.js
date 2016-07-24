@@ -403,6 +403,8 @@ router.post('/confirm', function(req, res, next) {
                 });
             }
 
+            req.log.info(JSON.stringify(result, null, 2));
+
             order
                 .setIsProcessed(true)
                 .setHasError(false)

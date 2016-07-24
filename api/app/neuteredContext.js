@@ -9,4 +9,6 @@ context.processor.paypalMassPayments.send = function(_, callback) {
     return callback(null, true);
 };
 
+context.meta.isNeutered = 'true';
+
 module.exports = context;
