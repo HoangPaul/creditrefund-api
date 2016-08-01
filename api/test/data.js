@@ -1,6 +1,5 @@
 var deepcopy = require('deepcopy');
 var crypto = require('crypto');
-var Order = require('app/order/order');
 
 var testData = {
     "developerPayload": {
@@ -47,84 +46,88 @@ var existingOrderId = crypto.randomBytes(32).toString('hex');
 var existingOrderData = deepcopy(testData);
 existingOrderData['orderId'] = existingOrderId;
 
-module.exports.newOrderId = newOrderId;
-module.exports.newOrderData = newOrderData;
-module.exports.existingOrderId = existingOrderId;
-module.exports.existingOrderData = existingOrderData;
+module.exports = {
+    // Order
+    'newOrderId': newOrderId,
+    'newOrderData': newOrderData,
+    'existingOrderId': existingOrderId,
+    'existingOrderData': existingOrderData,
+    'insertExistingOrder': function(done, context) {
+        context.dbDriver.put({
+            'TableName': 'orders',
+            'Key': {
+                'orderId': existingOrderId
+            },
+            'Item': existingOrderData
+        }, done);
+    },
+    'deleteExistingOrder': function(done, context) {
+        context.dbDriver.delete({
+            'TableName': 'orders',
+            'Key': {
+                'orderId': existingOrderId
+            }
+        }, done);
+    },
+    'deleteNewOrder': function(done, context) {
+        context.dbDriver.delete({
+            'TableName': 'orders',
+            'Key': {
+                'orderId': newOrderId
+            }
+        }, done);
+    },
 
-module.exports.insertExistingOrder = function(done, context) {
-    context.dbDriver.put({
-        'TableName': 'orders',
-        'Key': {
-            'orderId': existingOrderId
-        },
-        'Item': existingOrderData
-    }, done);
-};
-module.exports.deleteExistingOrder = function(done, context) {
-    context.dbDriver.delete({
-        'TableName': 'orders',
-        'Key': {
-            'orderId': existingOrderId
-        }
-    }, done);
-};
-module.exports.deleteNewOrder = function(done, context) {
-    context.dbDriver.delete({
-        'TableName': 'orders',
-        'Key': {
-            'orderId': newOrderId
-        }
-    }, done);
-};
-
-module.exports.enabledPayoutOptionId = crypto.randomBytes(32).toString('hex');
-module.exports.disabledPayoutOptionId = crypto.randomBytes(32).toString('hex');
-
-module.exports.addPayoutOptions = function(done, context) {
-    context.dbDriver.batchWrite({
-        'RequestItems': {
-            'payoutOptions': [
-                {
-                    'PutRequest': {
-                        'Item': {
-                            'payoutOption': module.exports.enabledPayoutOptionId,
-                            'isEnabled': true
+    // Payout
+    'enabledPayoutOptionId': crypto.randomBytes(32).toString('hex'),
+    'disabledPayoutOptionId': crypto.randomBytes(32).toString('hex'),
+    'addPayoutOptions': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'payoutOptions': [
+                    {
+                        'PutRequest': {
+                            'Item': {
+                                'payoutOption': module.exports.enabledPayoutOptionId,
+                                'isEnabled': true
+                            }
+                        }
+                    },
+                    {
+                        'PutRequest': {
+                            'Item': {
+                                'payoutOption': module.exports.disabledPayoutOptionId,
+                                'isEnabled': false
+                            }
                         }
                     }
-                },
-                {
-                    'PutRequest': {
-                        'Item': {
-                            'payoutOption': module.exports.disabledPayoutOptionId,
-                            'isEnabled': false
+                ]
+            }
+        }, done);
+    },
+    'removePayoutOptions': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'payoutOptions': [
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'payoutOption': module.exports.enabledPayoutOptionId
+                            }
+                        }
+                    },
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'payoutOption': module.exports.disabledPayoutOptionId
+                            }
                         }
                     }
-                }
-            ]
-        }
-    }, done);
-};
-
-module.exports.removePayoutOptions = function(done, context) {
-    context.dbDriver.batchWrite({
-        'RequestItems': {
-            'payoutOptions': [
-                {
-                    'DeleteRequest': {
-                        'Key': {
-                            'payoutOption': module.exports.enabledPayoutOptionId
-                        }
-                    }
-                },
-                {
-                    'DeleteRequest': {
-                        'Key': {
-                            'payoutOption': module.exports.disabledPayoutOptionId
-                        }
-                    }
-                }
-            ]
-        }
-    }, done);
+                ]
+            }
+        }, done);
+    },
+    // System test data
+    'uniqueEmail': crypto.randomBytes(12).toString('hex') + '@example.com',
+    'uniqueDeviceId': crypto.randomBytes(16).toString('hex') + '--' + crypto.randomBytes(16).toString('hex')
 };

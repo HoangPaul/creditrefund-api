@@ -42,12 +42,20 @@ var paypalMassPayments = new PaypalMassPayments({
     "isProduction": isProduction
 });
 
-module.exports = {
+var context = {
+    'baseUrl': process.env.CR_BASE_URL,
     'dbDriver': dynamoDb,
     'iap': iap,
     'mailer': mailTransporter,
     'processor': {
         'pin': pin,
         'paypalMassPayments': paypalMassPayments
+    },
+    'meta': {
+        'version': 'v1',
+        'isProduction': isProduction ? 'true' : 'false',
+        'isNeutered': false
     }
 };
+
+module.exports = require('app/neuteredContext')(context);

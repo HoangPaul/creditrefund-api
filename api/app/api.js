@@ -100,11 +100,16 @@ router.post('/verify', function(req, res, next) {
                 );
             }
 
+            // All fields present, normalise them
+            us.each(requiredFields, function(field) {
+                data[field] = data[field].toString();
+            });
+
             // Check email
             if (!validator.isEmail(data['email'])) {
                 return callback(
                     new ValidationError(
-                        new Error('Malformed email ' + data['email'])
+                        new VisibleError('Malformed email ' + data['email'])
                     )
                 );
             }
@@ -206,7 +211,9 @@ router.post('/verify', function(req, res, next) {
             result[Quote.TOTAL_TITLE] = quote.getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
 
             req.log.info(result);
-            res.status(200).send(JSON.stringify(result));
+            res
+                .status(200)
+                .send(JSON.stringify(result));
         }
     );
 });

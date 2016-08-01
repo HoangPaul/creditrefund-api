@@ -1,14 +1,13 @@
-var context = require('app/context');
-var deepcopy = require('deepcopy');
+module.exports = function(oldContext) {
+    oldContext.processor.pin.createTransfer = function(_, callback) {
+        return callback(null, true);
+    };
+    oldContext.processor.paypalMassPayments.send = function(_, callback) {
+        return callback(null, {
+            'ACK': 'Success'
+        });
+    };
+    oldContext.meta.isNeutered = 'true';
 
-context.processor.pin.createTransfer = function(_, callback) {
-    return callback(null, true);
-};
-
-context.processor.paypalMassPayments.send = function(_, callback) {
-    return callback(null, true);
-};
-
-context.meta.isNeutered = 'true';
-
-module.exports = context;
+    return oldContext;
+}

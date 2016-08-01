@@ -35,6 +35,7 @@
     "validator": "^4.4.0"
   },
   "devDependencies": {
-    "minami": "^1.1.1"
+    "minami": "^1.1.1",
+    "supertest": "^2.0.0"
   }
 }
