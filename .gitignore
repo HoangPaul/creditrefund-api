@@ -1,12 +1,5 @@
-api/node_modules/
-api/npm-debug.log
-api/logs/*
-api/docs
-api/env
-
-# static site
-www/node_modules/
-www/resources/assets/vendor/
-www/public/assets/
-www/resources/tmp/
-www/public/
+node_modules/
+npm-debug.log
+logs/*
+docs
+env
