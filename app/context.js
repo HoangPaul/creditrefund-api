@@ -1,4 +1,4 @@
-var isProduction = process.env.CR_IS_PRODUCTION === "true";
+var isProduction = process.env.CR_IS_PRODUCTION === 'true';
 
 // Load DB
 var AWS = require("aws-sdk");
@@ -15,6 +15,8 @@ iap.config({
     googlePublicKeyStrSandbox: process.env.IAP_GOOGLE_PUBLIC_KEY,
     googlePublicKeyStrLive: process.env.IAP_GOOGLE_PUBLIC_KEY
 });
+var IapProcessor = require('app/iap');
+var iapProcessor = new IapProcessor(iap);
 
 // Load mailer
 var nodemailer = require('nodemailer');
@@ -41,17 +43,35 @@ var paypalMassPayments = new PaypalMassPayments({
     "isProduction": isProduction
 });
 
-module.exports = {
+// Config
+var Config = require('app/config');
+var config = new Config(dynamoDb, 'latest');
+
+// Stats
+var Stats = require('app/stats');
+var stats = new Stats(dynamoDb, 'latest');
+
+var context = {
+    'baseUrl': process.env.CR_BASE_URL,
     'dbDriver': dynamoDb,
-    'iap': iap,
+    'iapProcessor': iapProcessor,
     'mailer': mailTransporter,
     'processor': {
         'pin': pin,
         'paypalMassPayments': paypalMassPayments
     },
-    'meta': {
-        'version': 'v1',
-        'isProduction': isProduction ? 'true' : 'false',
-        'isNeutered': false
-    }
+    'config': config,
+    'stats': stats
 };
+
+require('app/neuterContext')(context);
+
+context['meta'] = {
+    'version': 'v1',
+    'isProduction': isProduction ? 'true' : 'false',
+    'isNeutered': process.env.CR_TEST_MODE === 'true',
+    'configCollectionName': context.config.name,
+    'statCollectionName': context.stats.name
+};
+
+module.exports = context;

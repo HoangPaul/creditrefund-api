@@ -4,38 +4,40 @@ var data = require('../../data');
 var Stats = require('app/stats');
 
 describe('Stats', function() {
+    this.timeout(10000);
     beforeEach(function(done) {
-        data.addStat(done, context);
+        data.addStat(context.dbDriver, done);
     });
 
     afterEach(function(done) {
-        data.deleteStat(done, context);
+        data.deleteStat(context.dbDriver, done);
     });
 
     it('should retrieve existing stat', function(done) {
-        Stats.get(context, data.statName, function(err, stat) {
+        var stats = new Stats(context.dbDriver, data.statCollectionName);
+        stats.get(data.statName, function(err, stat) {
             if (err) {
                 throw err;
             }
-            assert.equal(stat.name, data.statName);
-            assert.equal(stat.value, data.statValue);
+            assert.equal(stat, data.statValue);
             done();
         });
     });
 
     it('should add value existing stat', function(done) {
         var randomValue = Math.floor(Math.random() * 100);
-        Stats.add(context, data.statName, randomValue, function(err, _) {
+        var stats = new Stats(context.dbDriver, data.statCollectionName);
+        stats.add(data.statName, randomValue, function(err, _) {
             if (err) {
                 throw err;
             }
 
-            Stats.get(context, data.statName, function(err, stat) {
+            stats.get(data.statName, function(err, stat) {
                 if (err) {
                     throw err;
                 }
-                assert.equal(stat.name, data.statName);
-                assert.equal(stat.value, data.statValue + randomValue, "Stat value: " + data.statValue + ", random value: " + randomValue + ".");
+
+                assert.equal(stat, data.statValue + randomValue, "Stat value: " + data.statValue + ", random value: " + randomValue + ".");
                 done();
             });
         });
@@ -43,12 +45,12 @@ describe('Stats', function() {
 
     it('should insert non-existent stat', function(done) {
         var randomValue = Math.floor(Math.random() * 100);
-        Stats.add(context, data.newStatName, randomValue, function(err, stat) {
+        var stats = new Stats(context.dbDriver, data.statCollectionName);
+        stats.add(data.newStatName, randomValue, function(err, stat) {
             if (err) {
                 throw err;
             }
-            assert.equal(stat.name, data.newStatName);
-            assert.equal(stat.value, randomValue);
+            assert.equal(stat, randomValue);
             done();
         });
     })

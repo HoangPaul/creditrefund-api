@@ -3,34 +3,52 @@ var us = require('underscore');
 var TABLE_NAME = 'config';
 
 /**
+ * {Object} dbDriver
  * @constructor
  */
-function Config() {}
+function Config(dbDriver, name) {
+    this.dbDriver = dbDriver;
+    this.name = name;
+}
 
 /**
- * @param {{dbDriver: object, config: object}} context
  * @param {string} name
  * @param {function(?object {name: string, value: (string|number)}=)} callback
  */
-Config.get = function(context, name, callback) {
-    var params = {
-        TableName: TABLE_NAME,
-        Key: {
-            'name': name
+Config.prototype.get = function(name, callback) {
+    var self = this;
+    var _getConfig = function(name, callback) {
+        if (typeof self.config[name] === 'undefined') {
+            return callback(new Error('Cannot find config "' + name + '"'));
+        } else {
+            return callback(null, self.config[name]);
         }
     };
 
-    context.dbDriver.get(params, function(err, dbData) {
-        if (err) {
-            return callback(err);
-        }
+    if (typeof this.config === 'undefined') {
+        var params = {
+            TableName: TABLE_NAME,
+            Key: {
+                'name': this.name
+            }
+        };
 
-        if (us.size(dbData) === 0) {
-            return callback(new Error('Cannot find config "' + name + '"'));
-        }
+        this.dbDriver.get(params, function(err, dbData) {
+            if (err) {
+                return callback(err);
+            }
 
-        return callback(null, dbData.Item);
-    });
+            if (us.size(dbData) === 0) {
+                return callback(new Error('Cannot find config collection "' + self.name + '"'));
+            }
+
+            self.config = dbData.Item.config;
+
+            return _getConfig(name, callback);
+        });
+    } else {
+        return _getConfig(name, callback);
+    }
 };
 
 module.exports = Config;

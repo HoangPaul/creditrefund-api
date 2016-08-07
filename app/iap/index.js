@@ -1,11 +1,9 @@
-var iap = require('in-app-purchase');
-
 /**
- * @param {object} context
+ * @param {object} iap
  * @constructor
  */
-function Iap(context) {
-	this.context = context;
+function Iap(iap) {
+	this.iap = iap;
 }
 
 /**
@@ -14,7 +12,8 @@ function Iap(context) {
  * @param callback
  */
 Iap.prototype.processGoogleOrder = function(signedData, signature, callback) {
-	this.context.iap.setup(function(err) {
+	var self = this;
+	self.iap.setup(function(err) {
 		if (err) {
 			return callback(err);
 		}
@@ -24,19 +23,18 @@ Iap.prototype.processGoogleOrder = function(signedData, signature, callback) {
 			"signature" : signature
 		};
 
-		iap.validate(iap.GOOGLE, receipt, function(err, iapRes) {
+		self.iap.validate(self.iap.GOOGLE, receipt, function(err, iapRes) {
 			if (err) {
 				return callback(err);
 			}
 
-			if (iap.isValidated(iapRes)) {
+			if (self.iap.isValidated(iapRes)) {
 				return callback(null, iapRes);
 			}
 
 			return callback(new Error('IAP has not been validated.'));
 		});
 	});
-
 };
 
 module.exports = Iap;

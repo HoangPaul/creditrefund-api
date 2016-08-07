@@ -2,59 +2,63 @@ var us = require('underscore');
 
 var TABLE_NAME = 'stats';
 
-function Stats() {}
+function Stats(dbDriver, name) {
+    this.dbDriver = dbDriver;
+    this.name = name;
+}
 
 /**
- * @param {{dbDriver: object, config: object}} context
- * @param {string} name Name of the stat
+ * @param {string} statName Name of the stat
  * @param {function(?object Object=)} callback
  */
-Stats.get = function(context, name, callback) {
+Stats.prototype.get = function(statName, callback) {
     var params = {
         TableName: TABLE_NAME,
         Key: {
-            'name': name
+            'name': this.name
         },
         ConsistentRead: true
     };
 
-    context.dbDriver.get(params, function(err, dbData) {
+    this.dbDriver.get(params, function(err, dbData) {
         if (err) {
             return callback(err);
         }
 
         if (us.size(dbData) === 0) {
-            return callback(new Error('Cannot find stat "' + name + '"'));
+            return callback(new Error('Cannot find stat "' + statName + '"'));
         }
 
-        return callback(null, dbData.Item);
+        return callback(null, dbData.Item.stats[statName]);
     });
 };
 
 /**
- * @param {{dbDriver: object, config: object}} context
- * @param {string} name Name of the stat
+ * @param {string} statName Name of the stat
  * @param {number} value Value to increase the stat by
  * @param {function(?object, object=)} callback
  */
-Stats.add = function(context, name, value, callback) {
+Stats.prototype.add = function(statName, value, callback) {
     var params = {
         TableName: TABLE_NAME,
         Key: {
-            'name': name
+            'name': this.name
         },
-        UpdateExpression: 'add #a :y',
-        ExpressionAttributeNames: {'#a': 'value'},
+        UpdateExpression: 'add #s.#n :y',
+        ExpressionAttributeNames: {
+            '#s': 'stats',
+            '#n': statName
+        },
         ExpressionAttributeValues: {':y': value},
-        ReturnValues: 'ALL_NEW'
+        ReturnValues: 'UPDATED_NEW'
     };
 
-    context.dbDriver.update(params, function (err, data) {
+    this.dbDriver.update(params, function (err, data) {
         if (err) {
             return callback(err);
         }
 
-        return callback(null, data.Attributes);
+        return callback(null, data.Attributes.stats[statName]);
     });
 };
 

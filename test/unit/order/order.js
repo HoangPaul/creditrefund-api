@@ -134,11 +134,9 @@ describe('Order', function() {
         });
 
         afterEach(function(done) {
-            data.deleteNewOrder(done, context);
-        });
-
-        after(function(done) {
-            data.insertExistingOrder(done, context);
+            data.deleteNewOrder(function() {
+                data.deleteExistingOrder(done, context);
+            }, context);
         });
 
         it('should load order if exists in database', function (done) {

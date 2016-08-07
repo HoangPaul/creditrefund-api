@@ -13,6 +13,10 @@ describe('POST /verify', function() {
     // Set 10s timeout
     this.timeout(10000);
 
+    beforeEach(function(done) {
+        data.editStat(context.dbDriver, 'test', {'batchTotal': 0}, done);
+    });
+
     it('should return success for valid (int) productId', function(done) {
         request
             .post('/' + context.meta.version + '/verify')
@@ -20,7 +24,7 @@ describe('POST /verify', function() {
                 'productId': 100,
                 'email': data.uniqueEmail,
                 'payoutOption': 'paypal',
-                'deviceId': data.uniqueDeviceId,
+                'deviceId': data.uniqueDeviceId
             })
             .expect('Content-Type', /json/)
             .expect(200, done);
@@ -105,6 +109,37 @@ describe('POST /verify', function() {
                         done();
                     }
                 });
+        });
+    });
+
+    it('should return error when stat limit is greater than config limit', function(done) {
+        context.config.get('maxBatchTotal', function(err, maxBatchTotal) {
+            if (err) {
+                throw err;
+            }
+
+            data.editStat(context.dbDriver, 'test', {'batchTotal': parseInt(maxBatchTotal) + 1}, function(err, _) {
+                if (err) {
+                    throw err;
+                }
+
+                context.stats.get('batchTotal', function(err, currBatchTotal) {
+                    assert.equal(currBatchTotal, parseInt(maxBatchTotal) + 1);
+
+                    request
+                        .post('/' + context.meta.version + '/verify')
+                        .send({
+                            'productId': 100,
+                            'email': data.uniqueEmail,
+                            'payoutOption': 'paypal',
+                            'deviceId': data.uniqueDeviceId
+                        })
+                        .expect('Content-Type', /json/)
+                        .expect(/4007/)
+                        .expect(/Help us improve your experience by sending an error report/)
+                        .expect(400, done);
+                });
+            });
         });
     });
 });

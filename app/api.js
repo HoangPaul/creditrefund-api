@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 var Blacklist = require('app/blacklist');
-var Config = require('app/config');
 var PayoutProcessorFactory = require('app/payout/processor/factory');
 var Product = require('app/product/product');
 var FeeCollection = require('app/payout/fee/collection');
@@ -13,11 +12,9 @@ var Customer = require('app/customer/customer');
 var Order = require('app/order/order');
 var OrderBuilder = require('app/order/builder');
 var OrderViewProcessor = require('app/order/view/processor');
-var Stats = require('app/stats');
 
 var PayoutProcessorHelper = require('app/payout/helper');
 
-var Iap = require('app/iap');
 var VisibleError = require('app/error/visible');
 var ValidationError = require('app/validation/error');
 
@@ -137,17 +134,17 @@ router.post('/verify', function(req, res, next) {
         function(callback) {
             return async.parallel({
                 'maxBatchTotal': function(callback) {
-                    return Config.get(context, 'maxBatchTotal', callback);
+                    return context.config.get('maxBatchTotal', callback);
                 },
                 'batchTotal': function(callback) {
-                    return Stats.get(context, 'batchTotal', callback);
+                    return context.stats.get('batchTotal', callback);
                 }
             }, callback);
         },
         function(results, callback) {
             var maxBatchTotal = results.maxBatchTotal;
             var batchTotal = results.batchTotal;
-            if (batchTotal.value >= maxBatchTotal.value) {
+            if (batchTotal >= maxBatchTotal) {
                 return callback(new VisibleError(
                     apiMessages.DEFAULT_ERROR_TEMPLATE(),
                     apiMessages.BATCH_TOTAL_EXCEEDED));
@@ -279,7 +276,6 @@ router.post('/confirm', function(req, res, next) {
     });
 
     var context = req.context;
-    var iap = new Iap(context);
     var signature = req.body.signature;
     var signedData = JSON.parse(req.body.signedData);
     var developerPayload = JSON.parse(signedData.developerPayload);
@@ -294,7 +290,7 @@ router.post('/confirm', function(req, res, next) {
             if (typeof signature === 'undefined' || typeof signedData === 'undefined') {
                 return callback(new Error('Missing signature or signed data'));
             }
-            iap.processGoogleOrder(signedData, signature, callback);
+            context.iapProcessor.processGoogleOrder(signedData, signature, callback);
         },
 
         /**
@@ -307,7 +303,7 @@ router.post('/confirm', function(req, res, next) {
             var productId = signedData['productId'];
             var payoutOption = developerPayload['payoutOption'];
 
-            callback(null, context, productId, payoutOption);
+            return callback(null, context, productId, payoutOption);
         },
 
         // Build quote
@@ -464,10 +460,10 @@ router.post('/confirm', function(req, res, next) {
                 });
             });
 
-            var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
-            Stats.add(context, 'batchTotal', total, function(err, _) {
+            var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).round(2).toNumber();
+            context.stats.add('batchTotal', total, function(err, _) {
                 if (err) {
-                    return req.log.err(err);
+                    return req.log.error(err);
                 }
             });
         });
@@ -536,7 +532,7 @@ router.use(function(err, req, res, next) {
             'status': err.errorCode,
             'message': err.message,
             'reference': req.reqId
-        }
+        };
     } else {
         // Some random error that we're not suppose to show the world
         err = {
