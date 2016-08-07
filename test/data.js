@@ -127,6 +127,92 @@ module.exports = {
             }
         }, done);
     },
+    // Config
+    'configName': crypto.randomBytes(32).toString('hex'),
+    'configValue': crypto.randomBytes(32).toString('hex'),
+    'newConfigName': crypto.randomBytes(32).toString('hex'),
+    'addConfig': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'config': [
+                    {
+                        'PutRequest': {
+                            'Item': {
+                                'name': module.exports.configName,
+                                'value': module.exports.configValue
+                            }
+                        }
+                    }
+                ]
+            }
+        }, done);
+    },
+    'deleteConfig': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'config': [
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'name': module.exports.configName
+                            }
+                        }
+                    },
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'name': module.exports.newConfigName
+                            }
+                        }
+                    }
+                ]
+            }
+        }, done);
+    },
+
+    // Stats
+    'statName': crypto.randomBytes(32).toString('hex'),
+    'statValue': Math.floor(Math.random() * 100),
+    'newStatName': crypto.randomBytes(32).toString('hex'),
+    'addStat': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'stats': [
+                    {
+                        'PutRequest': {
+                            'Item': {
+                                'name': module.exports.statName,
+                                'value': module.exports.statValue
+                            }
+                        }
+                    }
+                ]
+            }
+        }, done);
+    },
+    'deleteStat': function(done, context) {
+        context.dbDriver.batchWrite({
+            'RequestItems': {
+                'stats': [
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'name': module.exports.statName
+                            }
+                        }
+                    },
+                    {
+                        'DeleteRequest': {
+                            'Key': {
+                                'name': module.exports.newStatName
+                            }
+                        }
+                    }
+                ]
+            }
+        }, done);
+    },
+
     // System test data
     'uniqueEmail': crypto.randomBytes(12).toString('hex') + '@example.com',
     'uniqueDeviceId': crypto.randomBytes(16).toString('hex') + '--' + crypto.randomBytes(16).toString('hex')

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var Blacklist = require('app/blacklist');
+var Config = require('app/config');
 var PayoutProcessorFactory = require('app/payout/processor/factory');
 var Product = require('app/product/product');
 var FeeCollection = require('app/payout/fee/collection');
@@ -12,6 +13,7 @@ var Customer = require('app/customer/customer');
 var Order = require('app/order/order');
 var OrderBuilder = require('app/order/builder');
 var OrderViewProcessor = require('app/order/view/processor');
+var Stats = require('app/stats');
 
 var PayoutProcessorHelper = require('app/payout/helper');
 
@@ -131,6 +133,26 @@ router.post('/verify', function(req, res, next) {
                 return callback(err);
             }
             callback(null);
+        },
+        function(callback) {
+            return async.parallel({
+                'maxBatchTotal': function(callback) {
+                    return Config.get(context, 'maxBatchTotal', callback);
+                },
+                'batchTotal': function(callback) {
+                    return Stats.get(context, 'batchTotal', callback);
+                }
+            }, callback);
+        },
+        function(results, callback) {
+            var maxBatchTotal = results.maxBatchTotal;
+            var batchTotal = results.batchTotal;
+            if (batchTotal.value >= maxBatchTotal.value) {
+                return callback(new VisibleError(
+                    apiMessages.DEFAULT_ERROR_TEMPLATE(),
+                    apiMessages.BATCH_TOTAL_EXCEEDED));
+            }
+            return callback();
         },
         function(callback) {
             var payoutProcessorClass = PayoutProcessorFactory.getPaymentProcessorClass(data['payoutOption']);
@@ -440,6 +462,13 @@ router.post('/confirm', function(req, res, next) {
                     'mailInfo': info,
                     'payoutResult': result
                 });
+            });
+
+            var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
+            Stats.add(context, 'batchTotal', total, function(err, _) {
+                if (err) {
+                    return req.log.err(err);
+                }
             });
         });
     });

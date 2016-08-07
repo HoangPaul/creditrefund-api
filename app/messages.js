@@ -21,7 +21,8 @@ module.exports = {
             return sprintf('Unable to verify payout. Please contact support at %s', SUPPORT_EMAIL);
         },
         BLACKLIST_ERROR_CODE: 4005,
-        PAYOUT_METHOD_NOT_AVAILABLE: 4006
+        PAYOUT_METHOD_NOT_AVAILABLE: 4006,
+        BATCH_TOTAL_EXCEEDED: 4007,
     },
     payout : {
         REFERENCE_NUMBER_TEMPLATE : function(data) {
