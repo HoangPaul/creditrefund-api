@@ -19,13 +19,10 @@ describe('POST /confirm', function() {
     });
 
     afterEach(function(done) {
-        return done();
         data.deleteNewOrder(function() {
             data.deleteExistingOrder(done, context);
         }, context);
     });
-
-    /*
 
     it('should return success for valid new order', function(done) {
         request
@@ -37,7 +34,6 @@ describe('POST /confirm', function() {
             .expect('Content-Type', /json/)
             .expect(200, done);
     });
-*/
 
     it('should return error for same order at the same time', function(done) {
         var counter = 0;

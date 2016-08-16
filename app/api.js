@@ -67,7 +67,8 @@ router.use(function(req, res, next) {
  * {
  *      "status": number,
  *      "message": string,
- *      "reference: string
+ *      "reference: string,
+ *      "nonce": string
  * }
  */
 router.post('/verify', function(req, res, next) {
@@ -228,6 +229,7 @@ router.post('/verify', function(req, res, next) {
             result['processorTitle'] = PayoutProcessorFactory.getPaymentProcessorClass(data['payoutOption']).PROCESSOR_TITLE;
             result[Quote.PAYOUT_TITLE] = quote.getQuoteValueByTitle(Quote.PAYOUT_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
             result[Quote.TOTAL_TITLE] = quote.getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).toFixed(2);
+            result['nonce'] = crypto.randomBytes(16).toString('hex');
 
             req.log.info(result);
             res
@@ -235,6 +237,13 @@ router.post('/verify', function(req, res, next) {
                 .send(JSON.stringify(result));
         }
     );
+});
+
+router.post('/capture', function(req, res, next) {
+    res.status(200).send(JSON.stringify({
+        'status': 0,
+        'message': ''
+    }));
 });
 
 
@@ -347,31 +356,14 @@ router.post('/confirm', function(req, res, next) {
             order.save(function(err) {
                 return callback(err, order);
             });
-        },
-
-        /**
-         * Try to load a customer if one exists
-         *
-         * @param {Order} order
-         * @param {function(?Object, ...)} callback
-         */
-        function(order, callback) {
-            return Customer.load(context, order.getEmail(), function(err, customer) {
-                if (err) {
-                    return callback(null, order);
-                }
-
-                return callback(null, order, customer);
-            });
         }
     ],
     /**
      * @param {?Object} err
      * @param {Order=} order
-     * @param {Order=} customer
      * @returns {*}
      */
-    function(err, order, customer) {
+    function(err, order) {
         if (err) {
             req.log.error({
                 err: err,
@@ -390,82 +382,11 @@ router.post('/confirm', function(req, res, next) {
             'email': order.getEmail()
         }));
 
-        // If this customer doesn't need to send money, mark it as complete and return immediately
-        if (typeof customer !== 'undefined' && customer.getIsSendable() === false) {
-            order.setIsProcessed(true);
-            order.save(function(err) {
-                if (err) {
-                    req.log.error({
-                        error: err,
-                        order: order
-                    });
-                }
-            });
-            return;
-        }
-
-        // Load the payment processor from the payload
-        var payoutOption = developerPayload['payoutOption'];
-        var payoutProcessorHelper = new PayoutProcessorHelper(context);
-        var payoutOptionClass = PayoutProcessorFactory.getPaymentProcessorClass(payoutOption);
-        var payoutProcessor = new payoutOptionClass(context, payoutProcessorHelper);
-
-        payoutProcessor.sendPayment(order, function(err, result) {
+        var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).round(2).toNumber();
+        context.stats.add('batchTotal', total, function(err, _) {
             if (err) {
-                order.setIsProcessed(true)
-                    .setHasError(true)
-                    .save(function(err) {
-                        if (err) {
-                            req.log.error({
-                                error: err,
-                                order: order
-                            });
-                        }
-                    });
-                return req.log.error({
-                    error: err,
-                    order: order
-                });
+                return req.log.error(err);
             }
-
-            req.log.info(JSON.stringify(result, null, 2));
-
-            order
-                .setIsProcessed(true)
-                .setHasError(false)
-                .save(function(err) {
-                    if (err) {
-                        req.log.error({
-                            error: err,
-                            order: order
-                        });
-                    }
-                });
-
-            var mailOptions = {
-                'from': '<support@creditrefund.com.au>',
-                'to': order.getEmail(),
-                'subject': OrderViewProcessor.getSubject(order),
-                'text': OrderViewProcessor.processTextNewOrderEmail(order),
-                'xMailer': false
-            };
-
-            context.mailer.sendMail(mailOptions, function(err, info) {
-                if (err) {
-                    return req.log.error(err);
-                }
-                req.log.info({
-                    'mailInfo': info,
-                    'payoutResult': result
-                });
-            });
-
-            var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).round(2).toNumber();
-            context.stats.add('batchTotal', total, function(err, _) {
-                if (err) {
-                    return req.log.error(err);
-                }
-            });
         });
     });
 });

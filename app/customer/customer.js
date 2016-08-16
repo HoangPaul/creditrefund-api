@@ -1,5 +1,6 @@
 var assert = require('assert');
 var us = require('underscore');
+var CustomerDoesNotExistError = require('app/customer/error/customerDoesNotExist');
 
 var TABLE_NAME = 'customers';
 
@@ -19,7 +20,7 @@ function Customer(email, isSendable) {
 /**
  * @param {{dbDriver: object, config: object}} context
  * @param {string} email
- * @param {function(?object Customer=)} callback
+ * @param {function(?(Object|CustomerDoesNotExistError) Customer=)} callback
  */
 Customer.load = function(context, email, callback) {
     var params = {
@@ -35,7 +36,7 @@ Customer.load = function(context, email, callback) {
         }
 
         if (us.size(dbData) === 0) {
-            return callback(new Error('Cannot find customer with email "' + email + '"'));
+            return callback(new CustomerDoesNotExistError('Cannot find customer with email "' + email + '"'));
         }
 
         var customer = new Customer(email, dbData.Item['isSendable']);

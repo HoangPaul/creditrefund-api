@@ -51,6 +51,10 @@ var config = new Config(dynamoDb, 'latest');
 var Stats = require('app/stats');
 var stats = new Stats(dynamoDb, 'latest');
 
+// Order Backlog
+var OrderBacklog = require('app/order/backlog');
+var orderBacklog = new OrderBacklog(dynamoDb);
+
 var context = {
     'baseUrl': process.env.CR_BASE_URL,
     'dbDriver': dynamoDb,
@@ -60,11 +64,12 @@ var context = {
         'pin': pin,
         'paypalMassPayments': paypalMassPayments
     },
+    'orderBacklog': orderBacklog,
     'config': config,
     'stats': stats
 };
 
-require('app/neuterContext')(context);
+//require('app/neuterContext')(context);
 
 context['meta'] = {
     'version': 'v1',
