@@ -383,6 +383,17 @@ router.post('/confirm', function(req, res, next) {
         }));
 
         var total = order.getQuote().getQuoteValueByTitle(Quote.TOTAL_TITLE).getValue(QuoteValue.DOLLARS).round(2).toNumber();
+
+        context.orderBacklog.add(order, function(err) {
+            if (err) {
+                req.log.error({
+                    err: err,
+                    req: req,
+                    body: req.body
+                });
+            }
+        });
+
         context.stats.add('batchTotal', total, function(err, _) {
             if (err) {
                 return req.log.error(err);
