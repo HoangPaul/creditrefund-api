@@ -10,6 +10,7 @@ var existingOrderId = data.existingOrderId;
 var existingOrderData = data.existingOrderData;
 
 describe('Order', function() {
+    this.timeout(10000);
     describe('OrderBuilder', function() {
         it('should throw error when building with insufficient data', function(done) {
             var OrderBuilder = require('app/order/builder');

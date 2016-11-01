@@ -6,7 +6,7 @@ var data = require('../../data');
 var OrderBacklog = require('app/order/backlog');
 var us = require('underscore');
 
-var ORDER_QUEUE_TABLE_NAME = 'testOrderBacklog';
+var ORDER_QUEUE_TABLE_NAME = 'orderBacklog';
 
 describe('OrderBacklog', function() {
     this.timeout(10000);

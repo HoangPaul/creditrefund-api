@@ -34,43 +34,4 @@ describe('POST /confirm', function() {
             .expect('Content-Type', /json/)
             .expect(200, done);
     });
-
-    it('should return error for same order at the same time', function(done) {
-        var counter = 0;
-        var triggerDoneOnEnd = function() {
-            if (++counter >= 2) {
-                done();
-            }
-        };
-
-        request
-            .post('/' + context.meta.version + '/confirm')
-            .send({
-                'signature': data.signature,
-                'signedData': JSON.stringify(data.signedData)
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-                triggerDoneOnEnd();
-            });
-
-        request
-            .post('/' + context.meta.version + '/confirm')
-            .send({
-                'signature': data.signature,
-                'signedData': JSON.stringify(data.signedData)
-            })
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-                triggerDoneOnEnd();
-            });
-    });
 });

@@ -69,12 +69,13 @@ var context = {
     'stats': stats
 };
 
-//require('app/neuterContext')(context);
+if (!isProduction) {
+    require('app/neuterContext')(context);
+}
 
 context['meta'] = {
     'version': 'v1',
     'isProduction': isProduction ? 'true' : 'false',
-    'isNeutered': process.env.CR_TEST_MODE === 'true',
     'configCollectionName': context.config.name,
     'statCollectionName': context.stats.name
 };

@@ -14,7 +14,7 @@ describe('POST /verify', function() {
     this.timeout(10000);
 
     beforeEach(function(done) {
-        data.editStat(context.dbDriver, 'test', {'batchTotal': 0}, done);
+        data.editStat(context.dbDriver, context.stats.name, {'batchTotal': 0}, done);
     });
 
     it('should return success for valid (int) productId', function(done) {
@@ -118,7 +118,7 @@ describe('POST /verify', function() {
                 throw err;
             }
 
-            data.editStat(context.dbDriver, 'test', {'batchTotal': parseInt(maxBatchTotal) + 1}, function(err, _) {
+            data.editStat(context.dbDriver, context.stats.name, {'batchTotal': parseInt(maxBatchTotal) + 1}, function(err, _) {
                 if (err) {
                     throw err;
                 }

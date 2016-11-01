@@ -13,17 +13,5 @@ module.exports = function(oldContext) {
         return callback(null, signedData);
     };
 
-    // Config
-    var Config = require('app/config');
-    oldContext.config = new Config(oldContext.dbDriver, 'test');
-
-    // Stats
-    var Stats = require('app/stats');
-    oldContext.stats = new Stats(oldContext.dbDriver, 'test');
-
-    // Order Backlog
-    var OrderBacklog = require('app/order/backlog');
-    oldContext.orderBacklog = new OrderBacklog(oldContext.dbDriver, 'testOrderBacklog');
-
     return oldContext;
 };

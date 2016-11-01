@@ -5,6 +5,7 @@ var Config = require('app/config');
 var crypto = require('crypto');
 
 describe('Config', function() {
+    this.timeout(10000);
     beforeEach(function(done) {
         data.addConfig(done, context);
     });
